@@ -1,19 +1,81 @@
 <template>
   <section class="container">
     <div class="addTopic">
-      <Button type="success">{{$t("data.addTopic")}}</Button>
+      <Button type="success" @click="addTopic">{{$t("data.addTopic")}}</Button>
     </div>
     <div>
       <Table :columns="columns" :data="data"></Table>
     </div>
+
+
+    <Drawer :title='$t("data.addTopic")' :closable="true" v-model="drawerModal" width="100%">
+      <div style="text-align: center">
+        <div style="width: 600px;margin: 0 auto" class="drawer-id">
+          <Form :model="ruleForm" :label-width="80">
+            <FormItem label="标题">
+              <Input v-model="ruleForm.username" placeholder="请输入长度不超过40的字符" :maxlength="40"></Input>
+            </FormItem>
+            <FormItem label="分类">
+              <Select>
+                <Option value="1">教程</Option>
+                <Option value="2">资料</Option>
+              </Select>
+            </FormItem>
+            <FormItem label="内容">
+              <quill-editor
+                :options="editorOption"
+                v-model="detailContent">
+              </quill-editor>
+            </FormItem>
+          </Form>
+        </div>
+      </div>
+    </Drawer>
   </section>
 </template>
 
 <script>
-import Cookies from 'js-cookie'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+const toolbarOptions = [
+  ['bold'],
+  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+  [{ 'color': [] }],
+  ['image','video']
+];
 export default {
   data () {
     return {
+      drawerModal:false,
+      detailContent:'',
+      options: {
+        // https://github.com/simple-uploader/Uploader/tree/develop/samples/Node.js
+        target: '/upload/file/upload',
+        testChunks: false,
+        query:{
+          fileType:'voice',
+          hotelCode:'YRCDO2RQJKOMQP2T'
+        }
+      },
+      editorOption:{
+        modules: {
+          toolbar: {
+            container: toolbarOptions,  // 工具栏
+            handlers: {
+              'image': function (value) {
+                if (value) {
+                  console.log(11);
+                  //document.querySelector('#uploadBtn').click();
+                } else {
+                  this.quill.format('image', false);
+                }
+              }
+            }
+          }
+        }
+      },
       ruleForm:{
         username:'',
         password:''
@@ -94,17 +156,15 @@ export default {
         this.list = res.data;
       });
     },
-    changeLocale(obj,lang) {
-      let locale = lang ? lang : Cookies.get('user_lang');
-      this.$i18n.locale = locale;
-      Cookies.set('user_lang',locale);
-    },
     handleSubmit (formName) {
       let _self = this;
       this.$refs[formName].validate((valid) => {
         if (valid) {
         }
       });
+    },
+    addTopic(){
+      this.drawerModal = true;
     }
   }
 }

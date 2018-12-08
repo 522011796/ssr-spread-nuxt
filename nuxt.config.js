@@ -30,7 +30,8 @@ module.exports = {
   ** Global CSS
   */
   css: [
-    '~assets/font-awesome/css/font-awesome.min.css'
+    '~assets/font-awesome/css/font-awesome.min.css',
+    '~assets/main.css'
   ],
 
   /*
@@ -41,7 +42,8 @@ module.exports = {
     '~plugins/i18n',
     '~plugins/moment',
     '~plugins/validation',
-    '~plugins/utils'
+    '~plugins/utils',
+    {src:'~plugins/vue-quill.js', ssr: false}
     /*{src: '~plugins/axios', ssr: true}*/
   ],
 
