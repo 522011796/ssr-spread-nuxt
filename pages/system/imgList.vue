@@ -1,6 +1,11 @@
 <template>
   <section class="container">
-    home1
+    <Card style="width:200px;height:240px;position: relative">
+      <div style="text-align:center;height:230px;width: 100%;border:1px solid #dddddd;">
+        <Icon type="ios-trash" style="font-size:22px;position: absolute;right:10px;"/>
+        <img src="" alt="" style="height:100%;width: 100%">
+      </div>
+    </Card>
   </section>
 </template>
 
@@ -42,6 +47,11 @@ export default {
 </script>
 
 <style>
-
+.container{
+  padding:10px 10px;
+}
+.ivu-card-body{
+  padding:5px;
+}
 </style>
 

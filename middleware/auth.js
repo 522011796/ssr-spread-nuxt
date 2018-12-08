@@ -28,7 +28,7 @@ export default function ({ isHMR, app, store, route, params, error, redirect,req
     redirect(path.name)
   } else if (token && route.name === LOGIN_PAGE_NAME) {
     // 已登录且要跳转的页面是登录页
-    redirect('/')
+    redirect('/topic/topicList')
   } else {
     redirect(path.name)
   }

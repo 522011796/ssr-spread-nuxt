@@ -11,6 +11,20 @@
     "topicList": "文章列表",
     "imgList": "资源管理"
   },
+  "data": {
+    "topicTitle": "标题",
+    "tipicSendAuthor": "发布者",
+    "topicContent": "内容片段",
+    "tipicSendTime": "发布时间",
+    "tipicLookNum": "浏览量",
+    "tipicAddNum": "关注量",
+    "tipicOpr": "操作",
+    "topicDetail": "详细",
+    "topicDelete": "删除",
+    "topicDisabled": "禁用",
+    "topicAccount": "同意",
+    "addTopic": "发布文章"
+  },
   "lang": {
     "inputRightTips":"该输入正确的信息!",
     "inputMax":"最多输入",

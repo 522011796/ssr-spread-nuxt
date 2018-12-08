@@ -2,14 +2,16 @@
   <div>
     <div class="header">
       <Menu ref="top_menu" mode="horizontal" :active-name="activeMenu" @on-select="selMainMenu">
-        <div class="layout-logo">{{activeMenu}}</div>
+        <div class="layout-logo">
+          论坛系统
+        </div>
         <div class="layout-nav">
-          <MenuItem name="topic" :to="{path: '/topic/home',name:'topic-topicList'}">
+          <MenuItem name="topic" :to="{path: '/topic/topicList',name:'topic-topicList'}">
             <Icon type="ios-paper" />
             {{$t('menu.topicMenu')}}
           </MenuItem>
-          <MenuItem name="system" :to="{path:'/system/home1',name:'system-imgList'}">
-            <Icon type="ios-paper" />
+          <MenuItem name="system" :to="{path:'/system/imgList',name:'system-imgList'}">
+            <Icon type="md-settings" />
             {{$t('menu.systemMenu')}}
           </MenuItem>
         </div>
@@ -32,7 +34,7 @@
           <Menu ref="side_menu" :active-name="menuSilder ? menuSilder : activeSilder" @on-select="selMenu" style="width: 200px">
             <div>
               <MenuItem name="system-imgList" :to="{path:'/system/imgList',name:'system-imgList'}">
-                <Icon type="md-document" />
+                <Icon type="ios-apps" />
                 {{$t('subMenu.imgList')}}
               </MenuItem>
             </div>

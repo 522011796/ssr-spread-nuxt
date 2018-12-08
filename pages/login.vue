@@ -22,7 +22,7 @@
     methods: {
       login(){
         Cookies.set('token', 'success');
-        setTimeout("window.location = '/';", 1000);
+        setTimeout("window.location = '/topic/topicList';", 1000);
       }
     }
   }
