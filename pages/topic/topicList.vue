@@ -102,6 +102,27 @@ export default {
           key: 'address'
         },
         {
+          title: this.$t("data.topicContent"),
+          render: (h, params) => {
+            return h('div', [
+              h('a', {
+                props: {
+                  type: 'primary',
+                  size: 'small'
+                },
+                style: {
+                  marginRight: '5px'
+                },
+                on: {
+                  click: () => {
+                    this.show(params.index)
+                  }
+                }
+              }, this.$t("data.topicDetail"))
+            ])
+          }
+        },
+        {
           title: this.$t("data.tipicOpr"),
           render: (h, params) => {
             return h('div', [

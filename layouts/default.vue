@@ -16,6 +16,18 @@
           </MenuItem>
         </div>
         <div class="clearfix"></div>
+
+        <div class="layout-user">
+          <Dropdown>
+            <a href="javascript:void(0)">
+              test
+              <Icon type="ios-arrow-down"></Icon>
+            </a>
+            <DropdownMenu slot="list">
+              <DropdownItem>退出</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
       </Menu>
     </div>
     <div v-if="loadingShow">
@@ -177,6 +189,11 @@
     margin-left: 200px;
     height:100%;
     position: relative;
+  }
+  .layout-user{
+    position: absolute;
+    right:30px;
+    top:0px;
   }
   .clearfix{
     clear:both;
