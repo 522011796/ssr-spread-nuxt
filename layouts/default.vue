@@ -3,7 +3,7 @@
     <div class="header">
       <Menu ref="top_menu" mode="horizontal" :active-name="activeMenu" @on-select="selMainMenu">
         <div class="layout-logo">
-          论坛系统
+          微站
         </div>
         <div class="layout-nav">
           <MenuItem name="topic" :to="{path: '/topic/topicList',name:'topic-topicList'}">
@@ -24,7 +24,7 @@
               <Icon type="ios-arrow-down"></Icon>
             </a>
             <DropdownMenu slot="list">
-              <DropdownItem>退出</DropdownItem>
+              <DropdownItem @click.native="logout">退出</DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>
@@ -65,6 +65,7 @@
 </template>
 
 <script>
+  import Cookies from 'js-cookie'
   export default {
     name: 'layout',
     computed: {
@@ -128,6 +129,10 @@
         this.activeMenu = event;
         localStorage.setItem('activeMenu',event);
         localStorage.removeItem("activeSilder");
+      },
+      logout(){
+        Cookies.remove('token');
+        window.location = '/login'
       }
     },
     mounted() {

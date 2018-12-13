@@ -9,6 +9,24 @@
 
 
     <Drawer :title='$t("data.addTopic")' :closable="true" v-model="drawerModal" width="100%">
+      <div style="display: none">
+        <Upload
+          ref="upload"
+          :show-upload-list="false"
+          :on-success="handleSuccess"
+          :max-size="10240"
+          :on-format-error="handleFormatError"
+          :on-exceeded-size="handleMaxSize"
+          multiple
+          type="drag"
+          action="//jsonplaceholder.typicode.com/posts/"
+          style="display: inline-block;width:58px;">
+          <div id="uploadBtn" style="width: 58px;height:58px;line-height: 58px;">
+            <Icon type="ios-camera" size="20"></Icon>
+          </div>
+        </Upload>
+      </div>
+
       <div style="text-align: center">
         <div style="width: 600px;margin: 0 auto" class="drawer-id">
           <Form :model="ruleForm" :label-width="80">
@@ -43,7 +61,7 @@ const toolbarOptions = [
   ['bold'],
   [{ 'list': 'ordered'}, { 'list': 'bullet' }],
   [{ 'color': [] }],
-  ['image','video']
+  ['image']
 ];
 export default {
   data () {
@@ -67,7 +85,7 @@ export default {
               'image': function (value) {
                 if (value) {
                   console.log(11);
-                  //document.querySelector('#uploadBtn').click();
+                  document.querySelector('#uploadBtn').click();
                 } else {
                   this.quill.format('image', false);
                 }
@@ -153,7 +171,22 @@ export default {
                     this.show(params.index)
                   }
                 }
-              }, this.$t("data.topicDisabled"))
+              }, this.$t("data.topicDisabled")),
+              h('a', {
+                props: {
+                  type: 'primary',
+                  size: 'small'
+                },
+                style: {
+                  marginRight: '5px',
+                  color:'#19be6b'
+                },
+                on: {
+                  click: () => {
+                    this.show(params.index)
+                  }
+                }
+              }, this.$t("data.topicTop"))
             ]);
           }
         }
@@ -186,6 +219,23 @@ export default {
     },
     addTopic(){
       this.drawerModal = true;
+    },
+    handleSuccess (res, file) {
+      file.url = 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar';
+      file.name = '7eb99afb9d5f317c912f08b5212fd69a';
+      console.log(res);
+    },
+    handleFormatError (file) {
+      this.$Notice.warning({
+        title: 'The file format is incorrect',
+        desc: 'File format of ' + file.name + ' is incorrect, please select jpg or png.'
+      });
+    },
+    handleMaxSize (file) {
+      this.$Notice.warning({
+        title: 'Exceeding file size limit',
+        desc: 'File  ' + file.name + ' is too large, no more than 2M.'
+      });
     }
   }
 }
