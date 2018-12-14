@@ -76,6 +76,13 @@ module.exports = {
         target: 'https://ricky-img.oss-cn-shenzhen.aliyuncs.com', // api主机
         pathRewrite: { '^/obj' : '/' }
       }
+    ],
+    [
+      '/upload',
+      {
+        target: 'http://jsonplaceholder.typicode.com/posts', // api主机
+        pathRewrite: { '^/upload' : '/' }
+      }
     ]
   ],
 
