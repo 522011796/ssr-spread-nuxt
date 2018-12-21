@@ -43,6 +43,7 @@ module.exports = {
     '~plugins/moment',
     '~plugins/validation',
     '~plugins/utils',
+    '~plugins/axios',
     {src:'~plugins/vue-quill.js', ssr: false}
     /*{src: '~plugins/axios', ssr: true}*/
   ],
@@ -66,22 +67,8 @@ module.exports = {
     [
       '/proxy',
       {
-        target: 'https://cnodejs.org/api/v1', // api主机
-        pathRewrite: { '^/proxy' : '/' }
-      }
-    ],
-    [
-      '/obj',
-      {
-        target: 'https://ricky-img.oss-cn-shenzhen.aliyuncs.com', // api主机
-        pathRewrite: { '^/obj' : '/' }
-      }
-    ],
-    [
-      '/upload',
-      {
-        target: 'http://jsonplaceholder.typicode.com/posts', // api主机
-        pathRewrite: { '^/upload' : '/' }
+        target: 'http://192.168.15.50:8088', // api主机
+        /*pathRewrite: { '^/proxy' : '/' }*/
       }
     ]
   ],

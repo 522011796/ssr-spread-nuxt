@@ -40,7 +40,11 @@
     "inputTwoNum":"正整数且最多两位小数",
     "inputSixtotwnty":"6-20位任意字符",
     "inputRightMac":"请输入正确的mac地址",
-    "inputRightIp":"请输入正确的ip地址"
+    "inputRightIp":"请输入正确的ip地址",
+    "delTipsOk":"是否确认删除该文章？",
+    "delTips":"删除文章？",
+    "topTipsOk":"是否确认置顶该文章？",
+    "topTips":"置顶文章？"
   }
 
 }

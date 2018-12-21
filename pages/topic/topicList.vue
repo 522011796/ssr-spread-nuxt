@@ -58,6 +58,7 @@
                     </div>
                   </Upload>
                 </div>
+                <Checkbox v-model="ruleForm.top" true-value="1" false-value="0" style="position: relative;bottom:25px;">首页滚动</Checkbox>
               </div>
             </FormItem>
             <FormItem label="分类" prop="type" :rules="$filter_rules({required:true})">
@@ -128,28 +129,32 @@ export default {
         title:'',
         imgUrl:'',
         type:'',
-        detailContent:''
+        detailContent:'',
+        top:'0'
       },
       columns: [
         {
           title: this.$t("data.topicTitle"),
-          key: 'name'
+          key: 'blogTitle'
         },
         {
           title: this.$t("data.tipicSendAuthor"),
-          key: 'age'
+          key: 'userNickname'
         },
         {
           title: this.$t("data.tipicSendTime"),
-          key: 'address'
+          key: 'blogAddtime'
         },
         {
           title: this.$t("data.tipicLookNum"),
-          key: 'address'
-        },
-        {
-          title: this.$t("data.tipicAddNum"),
-          key: 'address'
+          //key: 'blogPv'
+          render: (h, params) => {
+            return h('div', [
+                h('span', {
+
+                },params.row.blogPv ? params.row.blogPv : 0)
+            ])
+          }
         },
         {
           title: this.$t("data.topicContent"),
@@ -186,11 +191,11 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.show(params.index)
+                    this.deleteOpr(params,params.index)
                   }
                 }
               }, this.$t("data.topicDelete")),
-              h('a', {
+              /*h('a', {
                 props: {
                   type: 'primary',
                   size: 'small'
@@ -200,10 +205,10 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.show(params.index)
+                    this.disabledOpr(params,params.index)
                   }
                 }
-              }, this.$t("data.topicDisabled")),
+              }, this.$t("data.topicDisabled")),*/
               h('a', {
                 props: {
                   type: 'primary',
@@ -215,7 +220,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.show(params.index)
+                    this.topOpr(params,params.index)
                   }
                 }
               }, this.$t("data.topicTop"))
@@ -223,14 +228,7 @@ export default {
           }
         }
       ],
-      data: [
-        {
-          name: 'John Brown',
-          age: 18,
-          address: 'New York No. 1 Lake Park',
-          date: '2016-10-03'
-        }
-      ],
+      data: [],
       defaultList: [
         {
           'name': 'a42bdcc1178e62b4694c830f028db5c0',
@@ -245,12 +243,20 @@ export default {
     }
   },
   created() {
-    //this.init();
+    this.init();
   },
   methods:{
     init(){
-      this.$axios.get('/api/list').then(res => {
-        this.list = res.data;
+      var params = {
+        keyword:'',
+        page:1,
+        pageSize:15,
+        blogSlide:0
+      };
+      this.$api.get('/proxy/backend/get-blog-list',params,res => {
+        //this.list = res.data;
+        console.log(res);
+        this.data = res.data.data.blogList;
       });
     },
     handleSubmit (formName) {
@@ -309,6 +315,7 @@ export default {
           console.log(this.ruleForm);
         } else {
           this.$Message.error('Fail!');
+          console.log(this.ruleForm);
         }
       })
     },
@@ -318,6 +325,45 @@ export default {
     handleProgress(res,file,fileList){
       this.processStatusShow = true;
       this.processStatus = res.percent;
+    },
+    deleteOpr(params,index){
+      var _self = this;
+      this.$Modal.confirm({
+        title: this.$t('lang.delTips'),
+        content: "<div class='font-15'>"+ this.$t('lang.delTipsOk') + "</div>",
+        onOk: () => {
+          var paramsData = {
+            blogId:params.row.blogId
+          };
+          this.$api.postQs("/proxy/backend/del-blog", paramsData ,res => {
+            this.$Message.success(res.data.desc);
+            this.init();
+          },res=>{
+            this.$Message.error(res.data.desc);
+          },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
+        }
+      });
+    },
+    disabledOpr(params,index){
+
+    },
+    topOpr(params,index){
+      var _self = this;
+      this.$Modal.confirm({
+        title: this.$t('lang.topTips'),
+        content: "<div class='font-15'>"+ this.$t('lang.topTipsOk') + "</div>",
+        onOk: () => {
+          var paramsData = {
+            blogId:params.row.blogId
+          };
+          this.$api.postQs("/proxy/backend/set-blog-top", paramsData ,res => {
+            this.$Message.success(res.data.desc);
+            this.init();
+          },res=>{
+            this.$Message.error(res.data.desc);
+          },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
+        }
+      });
     }
   }
 }

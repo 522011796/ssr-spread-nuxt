@@ -44,8 +44,18 @@
           this.$Message.error('用户名和密码不能为空！');
           return;
         }
-        Cookies.set('token', 'success');
-        setTimeout("window.location = '/topic/topicList';", 1000);
+
+        var params = {
+          userPhone:this.username,
+          userPassword:this.password
+        };
+        this.$api.postQs("/proxy/security/admin-login", params ,res => {
+          this.$Message.success(res.data.desc);
+          Cookies.set('token', 'success');
+          setTimeout("window.location = '/topic/topicList';", 1000);
+        },res=>{
+          this.$Message.error(res.data.desc);
+        },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
       }
     }
   }
