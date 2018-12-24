@@ -6,3 +6,9 @@
   height:45px;
   line-height:45px;
 }
+.topicListId .ivu-modal-content{
+  height:600px;
+  width: 350px;
+  top:-60px;
+  overflow-y: auto;
+}

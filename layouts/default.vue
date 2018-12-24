@@ -10,17 +10,17 @@
             <Icon type="ios-paper" />
             {{$t('menu.topicMenu')}}
           </MenuItem>
-          <MenuItem name="system" :to="{path:'/system/imgList',name:'system-imgList'}">
+          <!--<MenuItem name="system" :to="{path:'/system/imgList',name:'system-imgList'}">
             <Icon type="md-settings" />
             {{$t('menu.systemMenu')}}
-          </MenuItem>
+          </MenuItem>-->
         </div>
         <div class="clearfix"></div>
 
         <div class="layout-user">
           <Dropdown>
             <a href="javascript:void(0)">
-              test
+              admin
               <Icon type="ios-arrow-down"></Icon>
             </a>
             <DropdownMenu slot="list">
@@ -131,8 +131,12 @@
         localStorage.removeItem("activeSilder");
       },
       logout(){
-        Cookies.remove('token');
-        window.location = '/login'
+        this.$api.postQs("/proxy/security/admin-logout", {} ,res => {
+          Cookies.remove('token');
+          window.location = '/login'
+        },res=>{
+          console.log(res);
+        });
       }
     },
     mounted() {

@@ -14,7 +14,7 @@ import Vue from 'vue'
 var Validation = {};
 Vue.prototype.$filter_rules = function(item){
     let rules = [];
-    if(item.required){
+    if(item.required && item.type !== 'array'){
         rules.push({ required: true, message: this.$t('lang.inputRightTips'), trigger: 'blur' });
     }
     if(item.maxLength){
@@ -29,6 +29,9 @@ Vue.prototype.$filter_rules = function(item){
             case 'email':
                 rules.push({type: 'email', message: this.$t('lang.inputRightMail'), trigger: 'blur'});
                 break;
+            case 'array':
+                rules.push({required: true, type: 'array',min:1, message: this.$t('lang.selCheckbox'), trigger: 'change'});
+            break;
             case 'phone':
                 rules.push({pattern: /^1[34578]\d{9}$/, message: this.$t('lang.inputRightPhone'), trigger: 'blur'});
                 break;
