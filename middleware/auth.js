@@ -30,6 +30,6 @@ export default function ({ isHMR, app, store, route, params, error, redirect,req
     // 已登录且要跳转的页面是登录页
     redirect('/topic/topicList')
   } else {
-    redirect(path.name)
+    redirect('/topic/topicList')
   }
 }

@@ -67,7 +67,7 @@ module.exports = {
     [
       '/proxy',
       {
-        target: 'http://192.168.15.50:8088', // api主机
+        target: 'https://bbs.9451.com', // api主机
         /*pathRewrite: { '^/proxy' : '/' }*/
       }
     ]

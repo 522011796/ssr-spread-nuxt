@@ -5,10 +5,9 @@
   "author": "9bf_100006791283_sanguing",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch server",
-    "build": "nuxt build",
-    "start": "cross-env NODE_ENV=production node server/index.js",
-    "generate": "nuxt generate"
+    "dev": "nuxt",
+    "start": "PORT=3001 nuxt start",
+    "build": "nuxt build && npm start"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.0.0",

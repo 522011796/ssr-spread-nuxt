@@ -43,7 +43,7 @@
           ref="upload"
           :show-upload-list="false"
           :on-success="handleSuccess"
-          :max-size="10240"
+          :max-size="1024000"
           :on-format-error="handleFormatError"
           :on-exceeded-size="handleMaxSize"
           :on-progress="handleAddProgress"
