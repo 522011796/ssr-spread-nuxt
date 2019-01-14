@@ -29,7 +29,13 @@ export default function ({ isHMR, app, store, route, params, error, redirect,req
   } else if (token && route.name === LOGIN_PAGE_NAME) {
     // 已登录且要跳转的页面是登录页
     redirect('/topic/topicList')
-  } else {
+  }else if (token && route.name === 'index') {
+    // 已登录且要跳转的页面是根路径
     redirect('/topic/topicList')
+  }else if (token && route.name === null) {
+    // 已登录且要跳转的页面是根路径
+    redirect('/topic/topicList')
+  } else {
+    redirect(path.name)
   }
 }

@@ -61,7 +61,19 @@
         <div style="width: 600px;margin: 0 auto" class="drawer-id">
           <Form :model="ruleForm" ref="ruleForm" :label-width="80">
             <FormItem label="标题" prop="blogTitle" :rules="$filter_rules({required:true})">
-              <Input v-model="ruleForm.blogTitle" placeholder="请输入长度不超过40的字符" :maxlength="40"></Input>
+              <Input v-model="ruleForm.blogTitle" placeholder="请输入长度不超过120的字符" :maxlength="120"></Input>
+            </FormItem>
+            <FormItem label="所属板块" prop="blogBlock" :rules="$filter_rules({required:true})">
+              <Select v-model="ruleForm.blogBlock">
+                <Option value="1">门锁板块</Option>
+                <Option value="2">窗帘板块</Option>
+                <Option value="3">网络设备板块</Option>
+                <Option value="4">智能开关板块</Option>
+                <Option value="5">智能插座板块</Option>
+                <Option value="6">传感器板块</Option>
+                <Option value="7">摄像头板块</Option>
+                <Option value="8">配件板块</Option>
+              </Select>
             </FormItem>
             <FormItem label="图片介绍" prop="blogSlideimgurl" :rules="$filter_rules({required:true})">
               <div style="position: relative;text-align: left;">
@@ -89,14 +101,36 @@
                     </div>
                   </Upload>
                 </div>
-                <Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0" style="position: relative;bottom:25px;">首页滚动</Checkbox>
+                <!--<Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0" style="position: relative;bottom:25px;">首页滚动</Checkbox>-->
               </div>
             </FormItem>
-
-            <FormItem label="分类" prop="categoryIdList" :rules="$filter_rules({required:true,type: 'array'})" style="text-align: left">
-              <CheckboxGroup v-model="ruleForm.categoryIdList">
-                <Checkbox v-for="(item,index) in categoryList" :key="index" :label="item.id">{{item.name}}</Checkbox>
+            <FormItem label="置顶" prop="blogSlide" :rules="$filter_rules({type:'checkboxArray'})">
+              <CheckboxGroup v-model="ruleForm.blogSlide" style="text-align: left">
+                <Checkbox label="1">
+                  <span>置顶到推荐列表</span>
+                </Checkbox>
+                <Checkbox label="2">
+                  <span>置顶到发现列表</span>
+                </Checkbox>
+                <Checkbox label="3">
+                  <span>置顶到推荐滚动</span>
+                </Checkbox>
+                <Checkbox label="4">
+                  <span>置顶到发现滚动</span>
+                </Checkbox>
               </CheckboxGroup>
+            </FormItem>
+            <FormItem label="分类" prop="categoryIdList" :rules="$filter_rules({required:true})">
+              <Select v-model="ruleForm.categoryIdList">
+                <Option value="1">讨论</Option>
+                <Option value="2">新闻</Option>
+                <Option value="3">分享</Option>
+                <Option value="4">求助</Option>
+                <Option value="5">原创</Option>
+                <Option value="6">转载</Option>
+                <Option value="7">教程</Option>
+                <Option value="8">开箱评测</Option>
+              </Select>
             </FormItem>
             <FormItem label="内容" prop="blogContent" :rules="$filter_rules({required:true})" style="position: relative;">
               <Progress v-if="processAddStatusShow == true && processAddStatus < 100" :percent="processAddStatus" hide-info style="position: absolute;top:-10px;left:0;z-index:9999;"/>
@@ -166,7 +200,7 @@ export default {
         blogSlideimgurl:'',
         categoryIdList:[],
         blogContent:'',
-        blogSlide:'0',
+        blogSlide:[],
         resourceUrlList:[],
         categoryId:''
       },
@@ -184,6 +218,10 @@ export default {
           key: 'blogAddtime'
         },
         {
+          title: this.$t("data.topicBlock"),
+          key: 'userNickname'
+        },
+        {
           title: this.$t("data.tipicLookNum"),
           //key: 'blogPv'
           render: (h, params) => {
@@ -191,6 +229,28 @@ export default {
                 h('span', {
 
                 },params.row.blogPv ? params.row.blogPv : 0)
+            ])
+          }
+        },
+        {
+          title: this.$t("data.tipicAddNum"),
+          //key: 'blogPv'
+          render: (h, params) => {
+            return h('div', [
+              h('span', {
+
+              },params.row.blogPv ? params.row.blogPv : 0)
+            ])
+          }
+        },
+        {
+          title: this.$t("data.tipicLikeNum"),
+          //key: 'blogPv'
+          render: (h, params) => {
+            return h('div', [
+              h('span', {
+
+              },params.row.blogPv ? params.row.blogPv : 0)
             ])
           }
         },
@@ -247,6 +307,21 @@ export default {
                   }
                 }
               }, this.$t("data.topicDisabled")),*/
+              /*h('a', {
+                props: {
+                  type: 'primary',
+                  size: 'small'
+                },
+                style: {
+                  marginRight: '5px',
+                  color:'#19be6b'
+                },
+                on: {
+                  click: () => {
+                    this.topOpr(params,params.index)
+                  }
+                }
+              }, this.$t("data.topicTop"))*/
               h('a', {
                 props: {
                   type: 'primary',
@@ -261,7 +336,7 @@ export default {
                     this.topOpr(params,params.index)
                   }
                 }
-              }, this.$t("data.topicTop"))
+              }, this.$t("data.update"))
             ]);
           }
         }
@@ -304,7 +379,7 @@ export default {
         keyword:'',
         page:_self.pageNow,
         pageSize:this.pageNum,
-        blogSlide:0
+        //blogSlide:0
       };
       this.$api.get('/proxy/backend/get-blog-list',params,res => {
         //this.list = res.data;
@@ -512,7 +587,7 @@ export default {
           blogSlideimgurl:'',
           categoryIdList:[],
           blogContent:'',
-          blogSlide:'0',
+          blogSlide:[],
           resourceUrlList:[],
           categoryId:''
         };

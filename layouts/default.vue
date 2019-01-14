@@ -7,8 +7,20 @@
         </div>
         <div class="layout-nav">
           <MenuItem name="topic" :to="{path: '/topic/topicList',name:'topic-topicList'}">
-            <Icon type="ios-paper" />
+            <Icon type="ios-paper" size="15"/>
             {{$t('menu.topicMenu')}}
+          </MenuItem>
+          <MenuItem name="goods" :to="{path: '/goods/goodsList',name:'goods-goodsList'}">
+            <Icon type="ios-archive" size="20"/>
+            {{$t('menu.goodsMenu')}}
+          </MenuItem>
+          <MenuItem name="block" :to="{path: '/block/blockList',name:'block-blockList'}">
+            <Icon type="md-apps" size="20"/>
+            {{$t('menu.blockMenu')}}
+          </MenuItem>
+          <MenuItem name="user" :to="{path: '/user/userList',name:'user-userList'}">
+            <Icon type="ios-people" size="20"/>
+            {{$t('menu.userMenu')}}
           </MenuItem>
           <!--<MenuItem name="system" :to="{path:'/system/imgList',name:'system-imgList'}">
             <Icon type="md-settings" />
@@ -36,8 +48,38 @@
           <Menu ref="side_menu" :active-name="menuSilder ? menuSilder : activeSilder" @on-select="selMenu" style="width: 200px">
             <div>
               <MenuItem name="topic-topicList" :to="{path:'/topic/topicList',name:'topic-topicList'}">
-                <Icon type="md-document" />
+                <Icon type="ios-paper" size="15"/>
                 {{$t('subMenu.topicList')}}
+              </MenuItem>
+            </div>
+          </Menu>
+        </div>
+        <div :class="menu == 'goods' ? 'show' : 'hidden'">
+          <Menu ref="side_menu" :active-name="menuSilder ? menuSilder : activeSilder" @on-select="selMenu" style="width: 200px">
+            <div>
+              <MenuItem name="goods-goodsList" :to="{path:'/goods/goodsList',name:'goods-goodsList'}">
+                <Icon type="ios-archive" size="20"/>
+                {{$t('subMenu.goodsList')}}
+              </MenuItem>
+            </div>
+          </Menu>
+        </div>
+        <div :class="menu == 'block' ? 'show' : 'hidden'">
+          <Menu ref="side_menu" :active-name="menuSilder ? menuSilder : activeSilder" @on-select="selMenu" style="width: 200px">
+            <div>
+              <MenuItem name="block-blockList" :to="{path:'/block/blockList',name:'block-blockList'}">
+                <Icon type="md-apps" size="20"/>
+                {{$t('subMenu.blockList')}}
+              </MenuItem>
+            </div>
+          </Menu>
+        </div>
+        <div :class="menu == 'user' ? 'show' : 'hidden'">
+          <Menu ref="side_menu" :active-name="menuSilder ? menuSilder : activeSilder" @on-select="selMenu" style="width: 200px">
+            <div>
+              <MenuItem name="user-userList" :to="{path:'/user/userList',name:'user-userList'}">
+                <Icon type="ios-people" size="20"/>
+                {{$t('subMenu.userList')}}
               </MenuItem>
             </div>
           </Menu>
@@ -46,7 +88,7 @@
           <Menu ref="side_menu" :active-name="menuSilder ? menuSilder : activeSilder" @on-select="selMenu" style="width: 200px">
             <div>
               <MenuItem name="system-imgList" :to="{path:'/system/imgList',name:'system-imgList'}">
-                <Icon type="ios-apps" />
+                <Icon type="ios-apps" size="20"/>
                 {{$t('subMenu.imgList')}}
               </MenuItem>
             </div>
@@ -129,6 +171,7 @@
         this.activeMenu = event;
         localStorage.setItem('activeMenu',event);
         localStorage.removeItem("activeSilder");
+        console.log(event);
       },
       logout(){
         this.$api.postQs("/proxy/security/admin-logout", {} ,res => {

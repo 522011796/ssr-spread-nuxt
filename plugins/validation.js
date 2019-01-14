@@ -29,9 +29,12 @@ Vue.prototype.$filter_rules = function(item){
             case 'email':
                 rules.push({type: 'email', message: this.$t('lang.inputRightMail'), trigger: 'blur'});
                 break;
-            case 'array':
+            case 'checkboxArray':
                 rules.push({required: true, type: 'array',min:1, message: this.$t('lang.selCheckbox'), trigger: 'change'});
-            break;
+                break;
+            case 'array':
+                rules.push({required: true, type: 'array',min:1, message: this.$t('lang.arrayTips'), trigger: 'change'});
+                break;
             case 'phone':
                 rules.push({pattern: /^1[34578]\d{9}$/, message: this.$t('lang.inputRightPhone'), trigger: 'blur'});
                 break;
