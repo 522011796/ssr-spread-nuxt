@@ -13,7 +13,8 @@
   "subMenu": {
     "topicList": "文章列表",
     "goodsList": "商品列表",
-    "blockList": "板块列表",
+    "topicBlockList": "文章板块列表",
+    "goodsBlockList": "商品板块列表",
     "userList": "用户列表",
     "imgList": "资源管理"
   },
@@ -49,6 +50,7 @@
     "blockLogo": "板块logo",
     "blockSubTitle": "板块副标题",
     "blockTopicNum": "文章数量",
+    "blockBgImg": "板块背景",
     "realName": "昵称",
     "openid": "openid",
     "phone": "手机号",
@@ -57,7 +59,7 @@
     "userLikedNum": "被点赞数",
     "userHeartNum": "被喜欢数",
     "userSharedNum": "主动分享数",
-    "userEyeNum": "被浏览器数量",
+    "userEyeNum": "被浏览数量",
     "userTopicNum": "文章数量"
   },
   "lang": {

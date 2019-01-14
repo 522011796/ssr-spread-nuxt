@@ -14,7 +14,7 @@
             <Icon type="ios-archive" size="20"/>
             {{$t('menu.goodsMenu')}}
           </MenuItem>
-          <MenuItem name="block" :to="{path: '/block/blockList',name:'block-blockList'}">
+          <MenuItem name="block" :to="{path: '/block/topicBlockList',name:'block-topicBlockList'}">
             <Icon type="md-apps" size="20"/>
             {{$t('menu.blockMenu')}}
           </MenuItem>
@@ -67,9 +67,13 @@
         <div :class="menu == 'block' ? 'show' : 'hidden'">
           <Menu ref="side_menu" :active-name="menuSilder ? menuSilder : activeSilder" @on-select="selMenu" style="width: 200px">
             <div>
-              <MenuItem name="block-blockList" :to="{path:'/block/blockList',name:'block-blockList'}">
+              <MenuItem name="block-topicBlockList" :to="{path:'/block/topicBlockList',name:'block-topicBlockList'}">
                 <Icon type="md-apps" size="20"/>
-                {{$t('subMenu.blockList')}}
+                {{$t('subMenu.topicBlockList')}}
+              </MenuItem>
+              <MenuItem name="block-goodsBlockList" :to="{path:'/block/goodsBlockList',name:'block-goodsBlockList'}">
+                <Icon type="ios-archive" size="20"/>
+                {{$t('subMenu.goodsBlockList')}}
               </MenuItem>
             </div>
           </Menu>
