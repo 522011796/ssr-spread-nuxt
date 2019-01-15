@@ -43,10 +43,11 @@
           ref="upload"
           :show-upload-list="false"
           :on-success="handleSuccess"
-          :max-size="1024000"
+          :max-size="1048576"
           :on-format-error="handleFormatError"
           :on-exceeded-size="handleMaxSize"
           :on-progress="handleAddProgress"
+          :before-upload="handleBeforeAdd"
           type="drag"
           name="resource"
           action="/proxy/backend/upload-resource"
@@ -88,7 +89,7 @@
                     :default-file-list="defaultList"
                     :on-success="handleSuccessTop"
                     :format="['jpg','jpeg','png']"
-                    :max-size="10240"
+                    :max-size="1048576"
                     :on-format-error="handleFormatErrorTop"
                     :on-exceeded-size="handleMaxSizeTop"
                     :on-progress="handleProgress"
@@ -158,7 +159,7 @@ import 'quill/dist/quill.bubble.css'
 
 const toolbarOptions = [
   ['bold'],
-  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+  /*[{ 'list': 'ordered'}, { 'list': 'bullet' }],*/
   [{ 'color': [] }],
   ['image']
 ];
@@ -596,6 +597,9 @@ export default {
     },
     handleReset (name) {
       this.$refs[name].resetFields();
+    },
+    handleBeforeAdd(res,file,fileList){
+      console.log(file);
     },
     handleProgress(res,file,fileList){
       this.processStatusShow = true;

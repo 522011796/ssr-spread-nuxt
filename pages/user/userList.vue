@@ -84,8 +84,8 @@
                       this.deleteOpr(params,params.index)
                     }
                   }
-                }, this.$t("data.topicDelete")),
-                h('a', {
+                }, this.$t("data.topicDisabled")),
+                /*h('a', {
                   props: {
                     type: 'primary',
                     size: 'small'
@@ -99,7 +99,7 @@
                       this.topOpr(params,params.index)
                     }
                   }
-                }, this.$t("data.update"))
+                }, this.$t("data.update"))*/
               ]);
             }
           }
