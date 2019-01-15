@@ -140,8 +140,10 @@
               </quill-editor>
             </FormItem>
           </Form>
+
         </div>
         <div>
+          <div style="display: none" id="htmlDetailShow" ref="htmlDetailShow" v-html="htmlDetailShow"></div>
           <Button type="success" @click="handleSubmit('ruleForm')">发布</Button>
         </div>
       </div>
@@ -169,6 +171,7 @@ export default {
       article:'',
       detailHtml:'',
       detailShowModal:false,
+      htmlDetailShow:'',
       options: {
         // https://github.com/simple-uploader/Uploader/tree/develop/samples/Node.js
         target: '/proxy/backend/upload-resource',
@@ -367,6 +370,21 @@ export default {
       totalCount:0,
     }
   },
+  watch: {
+    ruleForm: {
+      handler(newValue, oldValue) {
+        let article = newValue.blogContent.replace(/(\<iframe|\<\/iframe)/gi, function ($0, $1) {
+          return {
+            "<iframe":"<p><video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544675929245&di=082980f0dea86a5cacc47f1e4bea37a7&imgtype=0&src=http%3A%2F%2Fimg.debugrun.com%2Fpic%2F2017%2F10%2F30%2Fc1d115bd74da2a9bffb25c1b48e03dab.png'",
+            "</iframe": "</video></p",
+          }[$1];
+        });
+
+        this.htmlDetailShow = article;
+      },
+      deep: true
+    }
+  },
   created() {
     this.init();
     this.getType();
@@ -496,10 +514,56 @@ export default {
           //this.$Message.success('Success!');
           let article = this.ruleForm.blogContent.replace(/(\<iframe|\<\/iframe)/gi, function ($0, $1) {
             return {
-              "<iframe":"<video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544675929245&di=082980f0dea86a5cacc47f1e4bea37a7&imgtype=0&src=http%3A%2F%2Fimg.debugrun.com%2Fpic%2F2017%2F10%2F30%2Fc1d115bd74da2a9bffb25c1b48e03dab.png'",
-              "</iframe": "</video",
+              "<iframe":"<p><video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544675929245&di=082980f0dea86a5cacc47f1e4bea37a7&imgtype=0&src=http%3A%2F%2Fimg.debugrun.com%2Fpic%2F2017%2F10%2F30%2Fc1d115bd74da2a9bffb25c1b48e03dab.png'",
+              "</iframe": "</video></p",
             }[$1];
           });
+
+          let subDataHtml = {};
+          let subDataArr = [];
+          //this.htmlDetailShow = article;
+          //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p"));
+          let countP = document.querySelector("#htmlDetailShow").querySelectorAll("p");
+          for(var i =0;i<countP.length;i++){
+            //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("img"));
+            if(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("img")){
+              //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[src]")[0].currentSrc);
+              subDataArr.push(
+                {
+                  type: "img",
+                  data: document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[src]")[0].currentSrc
+                }
+              );
+            }else if(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("img")){
+              //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[video]")[0].currentSrc);
+              subDataArr.push(
+                {
+                  type: "video",
+                  data: document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[video]")[0].currentSrc
+                }
+              );
+            }else{
+              //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].innerText);
+              if(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].innerText.indexOf("\n") != -1){
+                console.log("\n");
+                subDataArr.push(
+                  {
+                    type: "text",
+                    data: "\n"
+                  }
+                );
+              }else{
+                subDataArr.push(
+                  {
+                    type: "text",
+                    data: document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].innerText
+                  }
+                );
+              }
+            }
+          }
+          console.log(subDataArr);
+          return
           //_self.ruleForm.blogContent = article;
           var params = {
             blogTitle:this.ruleForm.blogTitle,
@@ -508,7 +572,7 @@ export default {
             blogContent:article,
             resourceUrlList:this.ruleForm.resourceUrlList
           };
-          console.log(this.ruleForm);
+
           this.$api.postQs("/proxy/backend/add-blog", params ,res => {
             this.$Message.success(res.data.desc);
             this.ruleForm = {
