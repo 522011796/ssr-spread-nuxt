@@ -47,10 +47,10 @@
           :on-format-error="handleFormatError"
           :on-exceeded-size="handleMaxSize"
           :on-progress="handleAddProgress"
-          :before-upload="handleBeforeAdd"
           type="drag"
-          name="resource"
-          action="/proxy/backend/upload-resource"
+          :data="uploadOtherData"
+          name="file"
+          :action="uploadUrl"
           style="display: inline-block;width:58px;">
           <div id="uploadBtn" style="width: 58px;height:58px;line-height: 58px;">
             <Icon type="ios-camera" size="20"></Icon>
@@ -94,8 +94,9 @@
                     :on-exceeded-size="handleMaxSizeTop"
                     :on-progress="handleProgress"
                     type="drag"
-                    name="resource"
-                    action="/proxy/backend/upload-resource"
+                    :data="uploadOtherData"
+                    name="file"
+                    :action="uploadUrl"
                     style="width:58px;height:58px;">
                     <div style="width: 58px;height:56px;line-height: 58px;">
                       <Icon type="ios-camera" size="20"></Icon>
@@ -105,21 +106,27 @@
                 <!--<Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0" style="position: relative;bottom:25px;">首页滚动</Checkbox>-->
               </div>
             </FormItem>
-            <FormItem label="置顶" prop="blogSlide" :rules="$filter_rules({type:'checkboxArray'})">
+            <FormItem label="推荐" prop="blogSlide" :rules="$filter_rules({type:'checkboxArray'})">
               <CheckboxGroup v-model="ruleForm.blogSlide" style="text-align: left">
                 <Checkbox label="1">
                   <span>置顶到推荐列表</span>
                 </Checkbox>
-                <Checkbox label="2">
-                  <span>置顶到发现列表</span>
-                </Checkbox>
                 <Checkbox label="3">
                   <span>置顶到推荐滚动</span>
                 </Checkbox>
-                <Checkbox label="4">
+              </CheckboxGroup>
+            </FormItem>
+            <FormItem id="findForm" label="发现" style="margin-bottom: 0 !important;">
+              <Checkbox v-model="singleBox" @on-change="changeFindBox" style="float: left">开启</Checkbox>
+              <CheckboxGroup v-model="ruleForm.findBlogSlide" style="text-align: left">
+                <Checkbox label="2" :disabled="singleBox==false">
+                  <span>置顶到发现列表</span>
+                </Checkbox>
+                <Checkbox label="4" :disabled="singleBox==false">
                   <span>置顶到发现滚动</span>
                 </Checkbox>
               </CheckboxGroup>
+              <div style="text-align: left;height: 24px;line-height: 24px;color: #ed4014;">{{errorFindBox}}</div>
             </FormItem>
             <FormItem label="分类" prop="categoryIdList" :rules="$filter_rules({required:true})">
               <Select v-model="ruleForm.categoryIdList">
@@ -173,6 +180,9 @@ export default {
       detailHtml:'',
       detailShowModal:false,
       htmlDetailShow:'',
+      uploadUrl:'',
+      uploadOtherData:{},
+      errorFindBox:'',
       options: {
         // https://github.com/simple-uploader/Uploader/tree/develop/samples/Node.js
         target: '/proxy/backend/upload-resource',
@@ -199,6 +209,7 @@ export default {
           }
         }
       },
+      singleBox:false,
       ruleForm:{
         blogTitle:'',
         blogSlideimgurl:'',
@@ -206,7 +217,8 @@ export default {
         blogContent:'',
         blogSlide:[],
         resourceUrlList:[],
-        categoryId:''
+        categoryId:'',
+        findBlogSlide:[]
       },
       columns: [
         {
@@ -427,14 +439,8 @@ export default {
         this.categoryList = list;
       });
     },
-    handleSubmit (formName) {
-      let _self = this;
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-        }
-      });
-    },
     addTopic(){
+      this.getPhp();
       this.drawerModal = true;
       this.processStatusShow = false;
       this.processAddStatusShow = false;
@@ -510,6 +516,11 @@ export default {
       });
     },
     handleSubmit (name) {
+      this.errorFindBox = "";
+      if(this.singleBox == true && this.ruleForm.findBlogSlide.length == 0){
+        this.errorFindBox = "请选择至少一个选项";
+        return;
+      }
       this.$refs[name].validate((valid) => {
         if (valid) {
           //this.$Message.success('Success!');
@@ -595,11 +606,27 @@ export default {
         }
       })
     },
+    getPhp(){
+      this.$api.get("/proxy/backend/get-policy", {} ,res => {
+        console.log(res.data.data);
+        this.uploadOtherData = {
+          policy: res.data.data.policy,
+          callback: res.data.data.callback,
+          key: res.data.data.dir,
+          OSSAccessKeyId: res.data.data.accessid,
+          signature: res.data.data.signature,
+          expire: res.data.data.expire,
+          success_action_status: 200
+        };
+        this.uploadUrl = res.data.data.host;
+
+      });
+    },
     handleReset (name) {
       this.$refs[name].resetFields();
     },
-    handleBeforeAdd(res,file,fileList){
-      console.log(file);
+    handleBeforeAdd(file){
+
     },
     handleProgress(res,file,fileList){
       this.processStatusShow = true;
@@ -657,7 +684,8 @@ export default {
           blogContent:'',
           blogSlide:[],
           resourceUrlList:[],
-          categoryId:''
+          categoryId:'',
+          findBlogSlide:[]
         };
         this.$refs['ruleForm'].resetFields();
       }
@@ -678,6 +706,12 @@ export default {
         this.blogShowAddtime = res.data.data.blogInfo.blogAddtime;
         this.userHeadimgurl = res.data.data.blogInfo.userHeadimgurl;
       });
+    },
+    changeFindBox(status){
+      if(!status){
+        this.errorFindBox = "";
+        this.ruleForm.findBlogSlide = [];
+      }
     }
   }
 }

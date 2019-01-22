@@ -125,7 +125,7 @@
               </div>
             </FormItem>
             <FormItem label="置顶" prop="blogSlide" :rules="$filter_rules({required:true})" style="text-align: left">
-              <Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0" style="position: relative;">置顶到商品首页</Checkbox>
+              <Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0" style="position: relative;">置顶到板块</Checkbox>
             </FormItem>
           </Form>
         </div>
