@@ -637,10 +637,10 @@ export default {
             blogFind:this.singleBox,
             blogFindtop:this.ruleForm.blogFindtop,
             blogText:JSON.stringify(subDataArr),
-            blogContent:JSON.stringify(article),
+            blogContent:article,
             resourceUrlList:this.ruleForm.resourceUrlList,
           };
-          console.log(subDataArr);
+          //console.log(subDataArr);
           this.$api.postQs(url, this.$utils.clearData(params) ,res => {
             this.$Message.success(res.data.desc);
             this.drawerModal = false;
