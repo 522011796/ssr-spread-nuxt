@@ -437,7 +437,7 @@ export default {
       let text = JSON.parse(params.row.blogText);
       let content = "";
       for(var i=0;i<text.length;i++){
-        console.log(text[i].data);
+        //console.log(text[i].data);
         if(text[i].type == "text"){
           content += "<p>"+ text[i].data +"</p>";
         }
@@ -449,7 +449,7 @@ export default {
         }
       }
 
-      console.log(content);
+      //console.log(content);
 
       this.ruleForm = {
           blogId:params.row.blogId,
@@ -562,7 +562,7 @@ export default {
       this.$refs[name].validate((valid) => {
         if (valid) {
           //this.$Message.success('Success!');
-          console.log(2222);
+          //console.log(2222);
           let article = this.ruleForm.blogContent.replace(/(\<iframe|\<\/iframe)/gi, function ($0, $1) {
             return {
               "<iframe":"<p><video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://bbs.9451.com/proxy/img/video.jpg'",
@@ -760,7 +760,7 @@ export default {
         this.userShowNickname = res.data.data.blogInfo.userNickname;
         this.blogShowAddtime = res.data.data.blogInfo.blogAddtime;
         let c1 = res.data.data.blogInfo.blogContent.replace(/<img width="100%"/g, '<img');
-        let c2 = res.data.data.blogInfo.blogContent.replace(/<img/g, '<img width="100%"');
+        let c2 = res.data.data.blogInfo.blogContent.replace(/<img/g, '<img style="max-width:100%;"');
         this.blogShowContent = c2;
         this.blogShowAddtime = res.data.data.blogInfo.blogAddtime;
         this.userHeadimgurl = res.data.data.blogInfo.userHeadimgurl;
