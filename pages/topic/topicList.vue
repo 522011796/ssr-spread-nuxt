@@ -47,6 +47,7 @@
           :on-format-error="handleFormatError"
           :on-exceeded-size="handleMaxSize"
           :on-progress="handleAddProgress"
+          :before-upload="handleBeforeUpload"
           type="drag"
           :data="uploadOtherData"
           name="file"
@@ -66,14 +67,7 @@
             </FormItem>
             <FormItem label="所属板块" prop="blogBlock" :rules="$filter_rules({required:true})">
               <Select v-model="ruleForm.blogBlock">
-                <Option value="1">门锁板块</Option>
-                <Option value="2">窗帘板块</Option>
-                <Option value="3">网络设备板块</Option>
-                <Option value="4">智能开关板块</Option>
-                <Option value="5">智能插座板块</Option>
-                <Option value="6">传感器板块</Option>
-                <Option value="7">摄像头板块</Option>
-                <Option value="8">配件板块</Option>
+                <Option v-for="(item,index) in blockList" :value="item.moduleId" :key="index">{{item.moduleMaintitle}}</Option>
               </Select>
             </FormItem>
             <FormItem label="图片介绍" prop="blogSlideimgurl" :rules="$filter_rules({required:true})">
@@ -93,6 +87,7 @@
                     :on-format-error="handleFormatErrorTop"
                     :on-exceeded-size="handleMaxSizeTop"
                     :on-progress="handleProgress"
+                    :before-upload="handleBeforeUploadTop"
                     type="drag"
                     :data="uploadOtherData"
                     name="file"
@@ -103,41 +98,31 @@
                     </div>
                   </Upload>
                 </div>
-                <!--<Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0" style="position: relative;bottom:25px;">首页滚动</Checkbox>-->
+                <!--<Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0" style="position: relative;bottom:25px;">推荐滚动幻灯片</Checkbox>-->
               </div>
             </FormItem>
-            <FormItem label="推荐" prop="blogSlide" :rules="$filter_rules({type:'checkboxArray'})">
-              <CheckboxGroup v-model="ruleForm.blogSlide" style="text-align: left">
-                <Checkbox label="1">
-                  <span>置顶到推荐列表</span>
-                </Checkbox>
-                <Checkbox label="3">
-                  <span>置顶到推荐滚动</span>
-                </Checkbox>
-              </CheckboxGroup>
+            <FormItem label="推荐列表" style="text-align: left">
+              <Checkbox v-model="ruleForm.blogSlide" true-value="1" false-value="0">推荐滚动幻灯片</Checkbox>
+              <Checkbox v-model="ruleForm.blogTop" true-value="1" false-value="0">推荐列表置顶</Checkbox>
             </FormItem>
-            <FormItem id="findForm" label="发现" style="margin-bottom: 0 !important;">
-              <Checkbox v-model="singleBox" @on-change="changeFindBox" style="float: left">开启</Checkbox>
-              <CheckboxGroup v-model="ruleForm.findBlogSlide" style="text-align: left">
-                <Checkbox label="2" :disabled="singleBox==false">
-                  <span>置顶到发现列表</span>
-                </Checkbox>
-                <Checkbox label="4" :disabled="singleBox==false">
-                  <span>置顶到发现滚动</span>
-                </Checkbox>
-              </CheckboxGroup>
+            <FormItem id="findForm" label="发现" style="margin-bottom: 24px !important;">
+              <Checkbox v-model="singleBox" @on-change="changeFindBox" true-value="1" false-value="0" style="float: left">放置到发现列表</Checkbox>
+              <Checkbox v-model="ruleForm.blogFindtop" true-value="1" false-value="0" :disabled="singleBox==false" style="float: left">置顶到发现列表</Checkbox>
+              <Checkbox v-model="ruleForm.blogFindslide" true-value="1" false-value="0" :disabled="singleBox==false" style="float: left">置顶到发现幻灯片</Checkbox>
+
               <div style="text-align: left;height: 24px;line-height: 24px;color: #ed4014;">{{errorFindBox}}</div>
             </FormItem>
             <FormItem label="分类" prop="categoryIdList" :rules="$filter_rules({required:true})">
               <Select v-model="ruleForm.categoryIdList">
-                <Option value="1">讨论</Option>
+                <Option v-for="(item,index) in typeList" :value="item.categoryId" :key="index">{{item.categoryName}}</Option>
+                <!--<Option value="1">讨论</Option>
                 <Option value="2">新闻</Option>
                 <Option value="3">分享</Option>
                 <Option value="4">求助</Option>
                 <Option value="5">原创</Option>
                 <Option value="6">转载</Option>
                 <Option value="7">教程</Option>
-                <Option value="8">开箱评测</Option>
+                <Option value="8">开箱评测</Option>-->
               </Select>
             </FormItem>
             <FormItem label="内容" prop="blogContent" :rules="$filter_rules({required:true})" style="position: relative;">
@@ -199,7 +184,7 @@ export default {
             handlers: {
               'image': function (value) {
                 if (value) {
-                  console.log(11);
+                  //console.log(11);
                   document.querySelector('#uploadBtn').click();
                 } else {
                   this.quill.format('image', false);
@@ -209,16 +194,22 @@ export default {
           }
         }
       },
-      singleBox:false,
+      singleBox:0,
       ruleForm:{
+        blogId:'',
         blogTitle:'',
         blogSlideimgurl:'',
         categoryIdList:[],
         blogContent:'',
-        blogSlide:[],
+        blogSlide:0,
         resourceUrlList:[],
         categoryId:'',
-        findBlogSlide:[]
+        findBlogSlide:[],
+        blogBlock:'',
+        blogTop:0,
+        blogFindslide:0,
+        blogFindtop:0,
+        blogFind:0
       },
       columns: [
         {
@@ -234,8 +225,25 @@ export default {
           key: 'blogAddtime'
         },
         {
-          title: this.$t("data.topicBlock"),
-          key: 'userNickname'
+          title: this.$t("data.topicType"),
+          //key: 'userNickname'
+          render: (h, params) => {
+            return h('div', [
+              h('span', {
+
+              },params.row.blogCategory[0].categoryName)
+            ])
+          }
+        },
+        {
+          title: this.$t("data.tipicSendTime"),
+          render: (h, params) => {
+            return h('div', [
+              h('span', {
+
+              },params.row.blogModule[0].moduleMaintitle)
+            ])
+          }
         },
         {
           title: this.$t("data.tipicLookNum"),
@@ -249,24 +257,13 @@ export default {
           }
         },
         {
-          title: this.$t("data.tipicAddNum"),
-          //key: 'blogPv'
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-
-              },params.row.blogPv ? params.row.blogPv : 0)
-            ])
-          }
-        },
-        {
           title: this.$t("data.tipicLikeNum"),
           //key: 'blogPv'
           render: (h, params) => {
             return h('div', [
               h('span', {
 
-              },params.row.blogPv ? params.row.blogPv : 0)
+              },params.row.blogLike ? params.row.blogLike : 0)
             ])
           }
         },
@@ -305,7 +302,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.deleteOpr(params,params.index)
+                    this.deleteOpr(params)
                   }
                 }
               }, this.$t("data.topicDelete")),
@@ -349,7 +346,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.topOpr(params,params.index)
+                    this.editTopic(params)
                   }
                 }
               }, this.$t("data.update"))
@@ -381,6 +378,11 @@ export default {
       current:1,
       pageNow:1,
       totalCount:0,
+      blockList:'',
+      blogTop:'',
+      typeList:[],
+      filename:'',
+      fileKey:'',
     }
   },
   watch: {
@@ -388,7 +390,7 @@ export default {
       handler(newValue, oldValue) {
         let article = newValue.blogContent.replace(/(\<iframe|\<\/iframe)/gi, function ($0, $1) {
           return {
-            "<iframe":"<p><video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544675929245&di=082980f0dea86a5cacc47f1e4bea37a7&imgtype=0&src=http%3A%2F%2Fimg.debugrun.com%2Fpic%2F2017%2F10%2F30%2Fc1d115bd74da2a9bffb25c1b48e03dab.png'",
+            "<iframe":"<p><video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://bbs.9451.com/proxy/img/video.jpg'",
             "</iframe": "</video></p",
           }[$1];
         });
@@ -400,7 +402,6 @@ export default {
   },
   created() {
     this.init();
-    this.getType();
   },
   methods:{
     init(page){
@@ -412,35 +413,63 @@ export default {
         pageSize:this.pageNum,
         //blogSlide:0
       };
-      this.$api.get('/proxy/backend/get-blog-list',params,res => {
+      this.$api.get('/proxy/backend/get-blog-list',this.$utils.clearData(params),res => {
         //this.list = res.data;
-        console.log(res);
+        //console.log(res);
         this.totalCount = parseInt(res.data.data.blogCount);
         this.data = res.data.data.blogList;
       });
     },
-    getType(){
-      this.$api.get('/proxy/backend/get-category-list',{},res => {
-        //this.list = res.data;
-        //console.log(res.data.data.categoryList);
-        let list = [
-          {
-            id:'1',
-            name:'教程'
-          },
-          {
-            id:'2',
-            name:'资料'
-          }
-        ];
-        let selList = ['1','2'];
-
-        this.ruleForm.categoryIdList = selList;
-        this.categoryList = list;
-      });
-    },
     addTopic(){
       this.getPhp();
+      this.getBlockList();
+      this.getType();
+      this.drawerModal = true;
+      this.processStatusShow = false;
+      this.processAddStatusShow = false;
+      this.ruleForm.imgUrl = '';
+    },
+    editTopic(params){
+      this.getPhp();
+      this.getBlockList();
+      this.getType();
+      //console.log(JSON.parse(params.row.blogText));
+      let text = JSON.parse(params.row.blogText);
+      let content = "";
+      for(var i=0;i<text.length;i++){
+        console.log(text[i].data);
+        if(text[i].type == "text"){
+          content += "<p>"+ text[i].data +"</p>";
+        }
+        if(text[i].type == "img"){
+          content += "<p>"+ "<img src='"+text[i].data+"'/>" +"</p>";
+        }
+        if(text[i].type == "video"){
+          content += "<p>"+ "<iframe style='width: 100% !important;' src='"+text[i].data+"'></iframe>" +"</p>";
+        }
+      }
+
+      console.log(content);
+
+      this.ruleForm = {
+          blogId:params.row.blogId,
+          blogTitle:params.row.blogTitle,
+          blogSlideimgurl:params.row.blogSlideimgurl,
+          categoryIdList:params.row.blogCategory[0].categoryId,
+          blogContent:content,
+          blogSlide:params.row.blogSlide,
+          resourceUrlList:params.row.resourceUrlList,
+          categoryId:params.row.blogCategory[0].categoryId,
+          findBlogSlide:params.row.blogFindSlide,
+          blogBlock:params.row.blogModule[0].moduleId,
+          blogTop:params.row.blogTop,
+          blogFindslide:params.row.blogFindSlide,
+          blogFindtop:params.row.blogFindtop,
+          blogFind:params.row.blogFind,
+          resourceUrlList:[]
+      };
+      //console.log(this.ruleForm);
+      this.singleBox = params.row.blogFind;
       this.drawerModal = true;
       this.processStatusShow = false;
       this.processAddStatusShow = false;
@@ -449,15 +478,12 @@ export default {
     handleSuccess (res, file) {
       let editor = this.$refs.myTextEditor.quill;
       let _self = this;
-      var dataType = res.data.resourceExtension.toLowerCase();
+      //console.log(res.data);
+      var dataType = res.data.resourceContenttype.toLowerCase();
       let url = "";
-      if(dataType == 'jpeg' || dataType == 'jpg' || dataType == 'png'){
-        if(res.data.resourceUrl.indexOf("http://") != -1 || res.data.resourceUrl.indexOf("https://") != -1){
-          url = res.data.resourceUrl;
-        }else{
-          url = "http://" + res.data.resourceUrl;
-        }
-        console.log(url);
+      if(dataType == 'image/jpeg' || dataType == 'image/jpg' || dataType == 'image/png'){
+        url = res.data.resourceUrl;
+        //console.log(url);
         _self.processStatusShow = false;
         _self.ruleForm.resourceUrlList.push(url);
         //_self.ruleForm.blogContent += "<img src='"+url+"' style='width: 100% !important;'/>";
@@ -467,12 +493,9 @@ export default {
         editor.setSelection(length + 1)
       }
 
-      if(dataType == 'mp4'){
-        if(res.data.resourceUrl.indexOf("http://") != -1 || res.data.resourceUrl.indexOf("https://") != -1){
-          url = res.data.resourceUrl;
-        }else{
-          url = "http://" + res.data.resourceUrl;
-        }
+      if(dataType == 'video/mp4'){
+        url = res.data.resourceUrl;
+        //console.log(url);
         _self.processStatusShow = false;
         _self.ruleForm.resourceUrlList.push(url);
         /*_self.ruleForm.blogContent  += '<video class="video-source" width="100%" height="180px"'
@@ -515,29 +538,45 @@ export default {
         desc: 'File  ' + file.name + ' is too large, no more than 10M.'
       });
     },
+    handleBeforeUploadTop(file){
+      let key = "";
+      //key = this.uploadOtherData.key + file.name;
+      this.filename = file.name;
+      this.uploadOtherData.key = this.fileKey + file.name;
+      //console.log(this.uploadOtherData.key);
+    },
+    handleBeforeUpload(file){
+      let key = "";
+      //key = this.uploadOtherData.key + file.name;
+      this.filename = file.name;
+      this.uploadOtherData.key = this.fileKey + file.name;
+      //console.log(this.uploadOtherData.key);
+    },
     handleSubmit (name) {
+      //console.log(1111111);
       this.errorFindBox = "";
-      if(this.singleBox == true && this.ruleForm.findBlogSlide.length == 0){
+      /*if(this.singleBox == true && this.ruleForm.findBlogSlide.length == 0){
         this.errorFindBox = "请选择至少一个选项";
         return;
-      }
+      }*/
       this.$refs[name].validate((valid) => {
         if (valid) {
           //this.$Message.success('Success!');
+          console.log(2222);
           let article = this.ruleForm.blogContent.replace(/(\<iframe|\<\/iframe)/gi, function ($0, $1) {
             return {
-              "<iframe":"<p><video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1544675929245&di=082980f0dea86a5cacc47f1e4bea37a7&imgtype=0&src=http%3A%2F%2Fimg.debugrun.com%2Fpic%2F2017%2F10%2F30%2Fc1d115bd74da2a9bffb25c1b48e03dab.png'",
+              "<iframe":"<p><video width='100%' height='180px' style='object-fit: cover;' controls webkit-playsinline='true' playsinline='true' x5-video-player-type='h5' x5-video-orientation='h5' x5-video-player-fullscreen='true' preload='auto' poster='https://bbs.9451.com/proxy/img/video.jpg'",
               "</iframe": "</video></p",
             }[$1];
           });
-
+          //console.log(33333);
           let subDataHtml = {};
           let subDataArr = [];
-          //this.htmlDetailShow = article;
-          //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p"));
+
           let countP = document.querySelector("#htmlDetailShow").querySelectorAll("p");
+          //console.log(article);
           for(var i =0;i<countP.length;i++){
-            //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("img"));
+            //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("video"));
             if(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("img")){
               //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[src]")[0].currentSrc);
               subDataArr.push(
@@ -546,12 +585,12 @@ export default {
                   data: document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[src]")[0].currentSrc
                 }
               );
-            }else if(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("img")){
-              //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[video]")[0].currentSrc);
+            }else if(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("video")){
+              //console.log(document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("video").currentSrc);
               subDataArr.push(
                 {
                   type: "video",
-                  data: document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelectorAll("[video]")[0].currentSrc
+                  data: document.querySelector("#htmlDetailShow").querySelectorAll("p")[i].querySelector("video").currentSrc
                 }
               );
             }else{
@@ -574,28 +613,36 @@ export default {
               }
             }
           }
-          console.log(subDataArr);
-          return
+          let url = "";
+          if(this.ruleForm.blogId){
+            url = "/proxy/backend/edit-blog";
+          }else{
+            url = "/proxy/backend/add-blog";
+          }
+          //console.log(55555);
+          let typeArr = [];
+          let blockArr = [];
+          typeArr.push(this.ruleForm.categoryIdList);
+          blockArr.push(this.ruleForm.blogBlock);
           //_self.ruleForm.blogContent = article;
           var params = {
+            blogId:this.ruleForm.blogId,
             blogTitle:this.ruleForm.blogTitle,
+            categoryIdList:JSON.stringify(typeArr),
+            moduleIdList:JSON.stringify(blockArr),
             blogSlide:this.ruleForm.blogSlide,
             blogSlideimgurl:this.ruleForm.blogSlideimgurl,
-            blogContent:article,
-            resourceUrlList:this.ruleForm.resourceUrlList
+            blogTop:this.ruleForm.blogTop,
+            blogFindslide:this.ruleForm.blogFindslide,
+            blogFind:this.singleBox,
+            blogFindtop:this.ruleForm.blogFindtop,
+            blogText:JSON.stringify(subDataArr),
+            blogContent:JSON.stringify(article),
+            resourceUrlList:this.ruleForm.resourceUrlList,
           };
-
-          this.$api.postQs("/proxy/backend/add-blog", params ,res => {
+          console.log(subDataArr);
+          this.$api.postQs(url, this.$utils.clearData(params) ,res => {
             this.$Message.success(res.data.desc);
-            this.ruleForm = {
-              blogTitle:'',
-                blogSlideimgurl:'',
-                categoryIdList:[],
-                blogContent:'',
-                blogSlide:'0',
-                resourceUrlList:[],
-                categoryId:''
-            };
             this.drawerModal = false;
             this.init();
           },res=>{
@@ -608,7 +655,9 @@ export default {
     },
     getPhp(){
       this.$api.get("/proxy/backend/get-policy", {} ,res => {
-        console.log(res.data.data);
+        if(this.filename!=""){
+          this.filename = this.filename
+        }
         this.uploadOtherData = {
           policy: res.data.data.policy,
           callback: res.data.data.callback,
@@ -619,6 +668,7 @@ export default {
           success_action_status: 200
         };
         this.uploadUrl = res.data.data.host;
+        this.fileKey = res.data.data.dir;
 
       });
     },
@@ -678,15 +728,24 @@ export default {
     closeModal(status){
       if(status == false){
         this.ruleForm = {
+          blogId:'',
           blogTitle:'',
           blogSlideimgurl:'',
           categoryIdList:[],
           blogContent:'',
-          blogSlide:[],
+          blogSlide:"0",
           resourceUrlList:[],
           categoryId:'',
-          findBlogSlide:[]
+          findBlogSlide:[],
+          blogBlock:'',
+          blogTop:"0",
+          blogFindslide:"0",
+          blogFindtop:"0",
+          blogFind:"0"
         };
+        //console.log(this.ruleForm);
+        this.typeList = [];
+        this.singleBox = "0";
         this.$refs['ruleForm'].resetFields();
       }
     },
@@ -696,7 +755,7 @@ export default {
       };
       this.detailShowModal = true;
       this.$api.get("/proxy/backend/get-blog-info", paramsData ,res => {
-        console.log(res);
+        //console.log(res);
         this.blogShowTitle = res.data.data.blogInfo.blogTitle;
         this.userShowNickname = res.data.data.blogInfo.userNickname;
         this.blogShowAddtime = res.data.data.blogInfo.blogAddtime;
@@ -712,6 +771,20 @@ export default {
         this.errorFindBox = "";
         this.ruleForm.findBlogSlide = [];
       }
+    },
+    getBlockList(){
+      var params = {
+        moduleType: 1
+      };
+      this.$api.get('/proxy/backend/get-module-list',params,res => {
+        this.blockList = res.data.data.moduleList;
+        //console.log(res.data.data.moduleList);
+      });
+    },
+    getType(){
+      this.$api.get('/proxy/backend/get-category-list',{},res => {
+        this.typeList = res.data.data.categoryList;
+      });
     }
   }
 }

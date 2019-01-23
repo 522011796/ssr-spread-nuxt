@@ -55,12 +55,12 @@
     "openid": "openid",
     "phone": "手机号",
     "account": "账号",
-    "userTopicNum": "文章数",
     "userLikedNum": "被点赞数",
     "userHeartNum": "被喜欢数",
     "userSharedNum": "主动分享数",
     "userEyeNum": "被浏览数量",
-    "userTopicNum": "文章数量"
+    "userTopicNum": "文章数量",
+    "topicType": "分类"
   },
   "lang": {
     "inputRightTips":"该输入正确的信息!",
@@ -79,7 +79,7 @@
     "inputRightIp":"请输入正确的ip地址",
     "selCheckbox":"请选择至少一个选项",
     "arrayTips":"至少需要一项数据",
-    "delTipsOk":"是否确认删除该文章？",
+    "delTipsOk":"是否确认删除该条数据？",
     "delTips":"删除文章？",
     "topTipsOk":"是否确认置顶该文章？",
     "topTips":"置顶文章？"

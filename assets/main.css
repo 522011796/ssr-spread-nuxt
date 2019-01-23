@@ -12,7 +12,7 @@
   top:-60px;
   overflow-y: auto;
 }
-#findForm .ivu-form-item-label:before{
+/*#findForm .ivu-form-item-label:before{
   content: '*';
   display: inline-block;
   margin-right: 4px;
@@ -20,4 +20,7 @@
   font-family: SimSun;
   font-size: 12px;
   color: #ed4014;
+}*/
+.ql-video{
+  width: 100%;
 }

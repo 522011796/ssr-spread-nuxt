@@ -20,14 +20,7 @@
             </FormItem>
             <FormItem label="所属板块" prop="goodsBlock" :rules="$filter_rules({required:true})">
               <Select v-model="ruleForm.goodsBlock">
-                <Option value="1">门锁板块</Option>
-                <Option value="2">窗帘板块</Option>
-                <Option value="3">网络设备板块</Option>
-                <Option value="4">智能开关板块</Option>
-                <Option value="5">智能插座板块</Option>
-                <Option value="6">传感器板块</Option>
-                <Option value="7">摄像头板块</Option>
-                <Option value="8">配件板块</Option>
+                <Option v-for="(item,index) in blockList" :value="item.moduleId" :key="index">{{item.moduleMaintitle}}</Option>
               </Select>
             </FormItem>
             <FormItem label="原价" prop="goodsOldPrice" :rules="$filter_rules({required:true,type:'float2'})">
@@ -53,9 +46,11 @@
                     :on-format-error="handleFormatErrorShow"
                     :on-exceeded-size="handleMaxSizeShow"
                     :on-progress="handleProgressShow"
+                    :before-upload="handleBeforeUpload"
                     type="drag"
-                    name="resource"
-                    action="/proxy/backend/upload-resource"
+                    name="file"
+                    :data="uploadOtherData"
+                    :action="uploadUrl"
                     style="width:58px;height:58px;">
                     <div style="width: 58px;height:56px;line-height: 58px;">
                       <Icon type="ios-camera" size="20"></Icon>
@@ -69,6 +64,9 @@
                 <div v-if="ruleForm.goodsTopScrollImg.length > 0" v-for="(item,index) in ruleForm.goodsTopScrollImg" :key="index" class="demo-upload-list" style="position: relative">
                   <!--<img :src="ruleForm.goodsTopScrollImg" alt="">-->
                   <img :src="item" alt="">
+                  <div class="demo-upload-list-cover">
+                    <Icon type="ios-trash-outline" @click.native="handleRemove(item,'scroll')"></Icon>
+                  </div>
                 </div>
                 <div class="demo-upload-list" style="position: relative">
                   <Progress v-if="processStatusScroll == true && processStatusScroll < 100" :percent="processStatus" hide-info style="position: absolute;top:0;left:0;z-index:9999;"/>
@@ -82,9 +80,11 @@
                     :on-format-error="handleFormatErrorTop"
                     :on-exceeded-size="handleMaxSizeTop"
                     :on-progress="handleProgressTop"
+                    :before-upload="handleBeforeUpload"
                     type="drag"
-                    name="resource"
-                    action="/proxy/backend/upload-resource"
+                    name="file"
+                    :data="uploadOtherData"
+                    :action="uploadUrl"
                     style="width:58px;height:58px;">
                     <div style="width: 58px;height:56px;line-height: 58px;">
                       <Icon type="ios-camera" size="20"></Icon>
@@ -100,6 +100,9 @@
               <div style="position: relative;text-align: left;">
                 <div v-if="ruleForm.goodsContent.length > 0" v-for="(item,index) in ruleForm.goodsContent" :key="index" class="demo-upload-list" style="position: relative">
                   <img :src="item" alt="">
+                  <div class="demo-upload-list-cover">
+                    <Icon type="ios-trash-outline" @click.native="handleRemove(item,'centent')"></Icon>
+                  </div>
                 </div>
                 <div class="demo-upload-list" style="position: relative">
                   <Progress v-if="processStatusContent == true && processStatusContent < 100" :percent="processStatus" hide-info style="position: absolute;top:0;left:0;z-index:9999;"/>
@@ -113,9 +116,11 @@
                     :on-format-error="handleFormatErrorContent"
                     :on-exceeded-size="handleMaxSizeContent"
                     :on-progress="handleProgressContent"
+                    :before-upload="handleBeforeUpload"
                     type="drag"
-                    name="resource"
-                    action="/proxy/backend/upload-resource"
+                    name="file"
+                    :data="uploadOtherData"
+                    :action="uploadUrl"
                     style="width:58px;height:58px;">
                     <div style="width: 58px;height:56px;line-height: 58px;">
                       <Icon type="ios-camera" size="20"></Icon>
@@ -158,39 +163,43 @@ export default {
         goodsDescription: '',
         goodsBlock: '',
         resourceUrlList: [],
-        blogSlide:'0'
+        blogSlide:'0',
+        productId:''
       },
       columns: [
         {
           title: this.$t("data.goodsName"),
-          key: 'blogTitle'
+          key: 'productName'
         },
         {
           title: this.$t("data.goodsType"),
-          key: 'userNickname'
+          key: 'productModel'
         },
         {
           title: this.$t("data.goodsModel"),
-          key: 'blogAddtime'
+          key: 'productModel'
         },
         {
           title: this.$t("data.goodsOldPrice"),
-          key: 'blogAddtime'
+          key: 'productOriginalprice'
         },
         {
           title: this.$t("data.goodsNowPrice"),
-          key: 'blogAddtime'
+          key: 'productPrice'
         },
         {
           title: this.$t("data.goodsShowImg"),
           render: (h, params) => {
-            return h('div', {
-              on: {
-                click: () => {
-                  this.showImg(params,params.index)
-                }
+            return h('img', {
+              style:{
+                width:'25px',
+                height:'25px',
+                marginTop:'5px'
+              },
+              attrs:{
+                src:params.row.productLogo
               }
-            }, params.row.blogAddtime)
+            });
           }
         },
         {
@@ -207,7 +216,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.deleteOpr(params,params.index)
+                    this.deleteOpr(params)
                   }
                 }
               }, this.$t("data.topicDelete")),
@@ -222,7 +231,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.topOpr(params,params.index)
+                    this.editGoods(params)
                   }
                 }
               }, this.$t("data.update"))
@@ -258,6 +267,12 @@ export default {
       current:1,
       pageNow:1,
       totalCount:0,
+      uploadOtherData:{},
+      uploadUrl:'',
+      filename:'',
+      fileKey:'',
+      editStatus:false,
+      blockList:[]
     }
   },
   created() {
@@ -269,16 +284,14 @@ export default {
       var _self = this;
       this.pageNow  = page ? page : this.pageNow;
       var params = {
-        keyword:'',
         page:_self.pageNow,
         pageSize:this.pageNum,
-        blogSlide:0
       };
-      this.$api.get('/proxy/backend/get-blog-list',params,res => {
+      this.$api.get('/proxy/backend/get-product-list',params,res => {
         //this.list = res.data;
         console.log(res);
-        this.totalCount = parseInt(res.data.data.blogCount);
-        this.data = res.data.data.blogList;
+        this.totalCount = parseInt(res.data.data.productCount);
+        this.data = res.data.data.productList;
       });
     },
     getType(){
@@ -301,7 +314,34 @@ export default {
         this.categoryList = list;
       });
     },
-    addGoods(){
+    addGoods(params){
+      this.getPhp();
+      this.getBlockList();
+      this.drawerModal = true;
+      this.processStatusShow = false;
+      this.processAddStatusShow = false;
+      this.ruleForm.imgUrl = '';
+    },
+    editGoods(params){
+      this.getPhp();
+      this.getBlockList();
+      //console.log(params.row.productContent);
+      this.ruleForm = {
+          goodsName: params.row.productName,
+          goodsType:  params.row.productModel,
+          goodsOldPrice:  params.row.productOriginalprice,
+          goodsNowPrice:  params.row.productPrice,
+          goodsTopScrollImg:  JSON.parse(params.row.productContent).goodsTopScrollImg,
+          goodsShowImg:  params.row.productLogo,
+          goodsContent:  JSON.parse(params.row.productContent).productContent,
+          goodsDescription:  JSON.parse(params.row.productContent).goodsDescription,
+          goodsBlock:  params.row.id,
+          //resourceUrlList:  params.row.id,
+          blogSlide: params.row.productTop,
+          productId: params.row.productId,
+        goodsBlock: params.row.productModule[0],
+      },
+
       this.drawerModal = true;
       this.processStatusShow = false;
       this.processAddStatusShow = false;
@@ -311,7 +351,52 @@ export default {
       let _self = this;
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(this.ruleForm);
+          let _self = this;
+          let url = "";
+          let arr = [];
+          let content = {};
+          arr.push(parseInt(this.ruleForm.goodsBlock));
+          content = {
+            goodsDescription:this.ruleForm.goodsDescription,
+            productContent:this.ruleForm.goodsContent,
+            goodsTopScrollImg:this.ruleForm.goodsTopScrollImg,
+          };
+
+          let paramsData = {
+            productId:this.ruleForm.productId,
+            productName:this.ruleForm.goodsName,
+            productModel:this.ruleForm.goodsType,
+            moduleIdList:JSON.stringify(arr),
+            productPrice:this.ruleForm.goodsNowPrice,
+            productOriginalprice:this.ruleForm.goodsOldPrice,
+            productLogo:this.ruleForm.goodsShowImg,
+            productContent:JSON.stringify(content),
+            productTop:this.ruleForm.blogSlide
+          };
+
+          //console.log(this.ruleForm);
+
+          if(this.ruleForm.productId){
+            url = "/proxy/backend/edit-product";
+          }else{
+            url = "/proxy/backend/add-product";
+          }
+
+          this.$refs[formName].validate((valid) => {
+            if (valid) {
+              this.modal_loading = true;
+
+              this.$api.postQs(url, this.$utils.clearData(paramsData) ,res => {
+                this.$Message.success(res.data.desc);
+                this.modal_loading = false;
+                this.init();
+                this.drawerModal = false;
+              },res=>{
+                this.modal_loading = false;
+                this.$Message.error(res.data.desc);
+              },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
+            }
+          });
         }
       });
     },
@@ -328,7 +413,7 @@ export default {
     },
     handleSuccessShow (res, file) {
       this.ruleForm.goodsShowImg = res.data.resourceUrl;
-      this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
+      //this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
     },
     handleFormatErrorShow(file) {
       this.$Notice.warning({
@@ -350,7 +435,7 @@ export default {
     handleSuccessTop (res, file) {
       this.ruleForm.goodsTopScrollImg.push(res.data.resourceUrl);
       console.log(this.ruleForm.goodsTopScrollImg);
-      this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
+      //this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
     },
     handleFormatErrorTop(file) {
       this.$Notice.warning({
@@ -375,7 +460,7 @@ export default {
     },
     handleSuccessContent (res, file) {
       this.ruleForm.goodsContent.push(res.data.resourceUrl);
-      this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
+      //this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
     },
     handleFormatErrorContent(file) {
       this.$Notice.warning({
@@ -400,10 +485,73 @@ export default {
           goodsDescription: '',
           goodsBlock: '',
           resourceUrlList: [],
-          blogSlide:'0'
+          blogSlide:'0',
+          productId:''
 
       };
         this.$refs['ruleForm'].resetFields();
+      }
+    },
+    getPhp(){
+      this.$api.get("/proxy/backend/get-policy", {} ,res => {
+        //console.log(res.data.data);
+        if(this.filename!=""){
+          this.filename = this.filename
+        }
+        this.uploadOtherData = {
+          policy: res.data.data.policy,
+          callback: res.data.data.callback,
+          key: res.data.data.dir,
+          OSSAccessKeyId: res.data.data.accessid,
+          signature: res.data.data.signature,
+          expire: res.data.data.expire,
+          success_action_status: 200,
+          //name:'123412341234.png'
+        };
+        this.uploadUrl = res.data.data.host;
+        this.fileKey = res.data.data.dir
+
+      });
+    },
+    getBlockList(){
+      var params = {
+        moduleType: 2
+      };
+      this.$api.get('/proxy/backend/get-module-list',params,res => {
+        this.blockList = res.data.data.moduleList;
+        //console.log(res.data.data.moduleList);
+      });
+    },
+    handleBeforeUpload(file){
+      let key = "";
+      //key = this.uploadOtherData.key + file.name;
+      this.filename = file.name;
+      this.uploadOtherData.key = this.fileKey + file.name;
+    },
+    deleteOpr(params){
+      var _self = this;
+      this.$Modal.confirm({
+        title: this.$t('lang.delTips'),
+        content: "<div class='font-15'>"+ this.$t('lang.delTipsOk') + "</div>",
+        onOk: () => {
+          var paramsData = {
+            productId:params.row.productId
+          };
+          this.$api.postQs("/proxy/backend/del-product", paramsData ,res => {
+            this.$Message.success(res.data.desc);
+            this.init();
+          },res=>{
+            this.$Message.error(res.data.desc);
+          },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
+        }
+      });
+    },
+    handleRemove(file,type){
+      if(type=="scroll"){
+        this.ruleForm.goodsTopScrollImg.splice(this.ruleForm.goodsTopScrollImg.indexOf(file), 1);
+      }
+      if(type=="centent"){
+        this.ruleForm.goodsContent.splice(this.ruleForm.goodsContent.indexOf(file), 1);
       }
     }
   }
@@ -434,6 +582,24 @@ export default {
 .demo-upload-list img{
   width: 100%;
   height: 100%;
+}
+.demo-upload-list-cover{
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,.6);
+}
+.demo-upload-list:hover .demo-upload-list-cover{
+  display: block;
+}
+.demo-upload-list-cover i{
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  margin: 0 2px;
 }
 .demo-upload-list-cover{
   display: none;

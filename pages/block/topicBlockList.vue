@@ -29,10 +29,12 @@
               :max-size="10240"
               :on-format-error="handleFormatErrorShow"
               :on-exceeded-size="handleMaxSizeShow"
+              :before-upload="handleBeforeUpload"
               :on-progress="handleProgressShow"
               type="drag"
-              name="resource"
-              action="/proxy/backend/upload-resource"
+              name="file"
+              :data="uploadOtherData"
+              :action="uploadUrl"
               style="width:58px;height:58px;">
               <div style="width: 58px;height:56px;line-height: 58px;">
                 <Icon type="ios-camera" size="20"></Icon>
@@ -74,24 +76,35 @@
         },
         columns: [
           {
-            title: this.$t("data.blockName"),
-            key: 'blogTitle'
-          },
-          {
             title: this.$t("data.blockTitle"),
-            key: 'userNickname'
+            key: 'moduleMaintitle'
           },
           {
             title: this.$t("data.blockSubTitle"),
-            key: 'blogAddtime'
+            key: 'moduleSubtitle'
           },
           {
             title: this.$t("data.blockLogo"),
-            key: 'blogAddtime'
+            //key: 'blogAddtime'
+            render: (h, params) => {
+              return h('img', {
+                style:{
+                  width:'25px',
+                  height:'25px',
+                  marginTop:'5px'
+                },
+                attrs:{
+                  src:params.row.moduleLogo
+                }
+              });
+            }
           },
           {
             title: this.$t("data.blockTopicNum"),
-            key: 'blogAddtime'
+            //key: 'blogAddtime'
+            render: (h, params) => {
+              return h('span', '--');
+            }
           },
           {
             title: this.$t("data.tipicOpr"),
@@ -107,7 +120,7 @@
                   },
                   on: {
                     click: () => {
-                      this.deleteOpr(params,params.index)
+                      this.deleteOpr(params)
                     }
                   }
                 }, this.$t("data.topicDelete")),
@@ -122,7 +135,7 @@
                   },
                   on: {
                     click: () => {
-                      this.topOpr(params,params.index)
+                      this.editBlock(params)
                     }
                   }
                 }, this.$t("data.update"))
@@ -143,28 +156,29 @@
         totalCount:0,
         processStatus:0,
         processStatusShow:false,
-        modal_loading:false
+        modal_loading:false,
+        uploadOtherData:{},
+        uploadUrl:'',
+        filename:'',
+        fileKey:'',
+        editStatus:false
       }
     },
     created() {
       this.init();
-      this.getType();
     },
     methods:{
       init(page){
         var _self = this;
         this.pageNow  = page ? page : this.pageNow;
         var params = {
-          keyword:'',
-          page:_self.pageNow,
-          pageSize:this.pageNum,
-          blogSlide:0
+          moduleType: 1
         };
-        this.$api.get('/proxy/backend/get-blog-list',params,res => {
+        this.$api.get('/proxy/backend/get-module-list',params,res => {
           //this.list = res.data;
           console.log(res);
-          this.totalCount = parseInt(res.data.data.blogCount);
-          this.data = res.data.data.blogList;
+          //this.totalCount = parseInt(res.data.data.blogCount);
+          this.data = res.data.data.moduleList;
         });
       },
       getType(){
@@ -188,7 +202,41 @@
         });
       },
       addBlock(){
+        this.getPhp();
         this.drawerModal = true;
+      },
+      editBlock(params){
+        this.getPhp();
+        console.log(params.row);
+        this.ruleForm = {
+          blockLogo:params.row.moduleLogo,
+          blockTitle:params.row.moduleMaintitle,
+          blockSubTitle:params.row.moduleSubtitle,
+          //resourceUrlList:params.row.resourceUrlList,
+          moduleType:1,
+          moduleId:params.row.moduleId
+        };
+        console.log(this.ruleForm);
+        this.editStatus = true;
+        this.drawerModal = true;
+      },
+      deleteOpr(params){
+        var _self = this;
+        this.$Modal.confirm({
+          title: this.$t('lang.delTips'),
+          content: "<div class='font-15'>"+ this.$t('lang.delTipsOk') + "</div>",
+          onOk: () => {
+            var paramsData = {
+              moduleId:params.row.moduleId
+            };
+            this.$api.postQs("/proxy/backend/del-module", paramsData ,res => {
+              this.$Message.success(res.data.desc);
+              this.init();
+            },res=>{
+              this.$Message.error(res.data.desc);
+            },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
+          }
+        });
       },
       closeModal(status){
         if(status == false){
@@ -196,8 +244,10 @@
             blockLogo:'',
             blockTitle:'',
             blockSubTitle:'',
-            resourceUrlList:[]
+            resourceUrlList:[],
+            moduleId:''
           };
+          this.editStatus = false;
           this.$refs['ruleForm'].resetFields();
         }
       },//上传展示图
@@ -213,7 +263,7 @@
       },
       handleSuccessShow (res, file) {
         this.ruleForm.blockLogo = res.data.resourceUrl;
-        this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
+        //this.ruleForm.resourceUrlList.push(res.data.resourceUrl);
       },
       handleFormatErrorShow(file) {
         this.$Notice.warning({
@@ -223,16 +273,69 @@
       },
       handleSubmit (formName) {
         let _self = this;
+        let url = "";
+        let paramsData = {
+          moduleId:this.ruleForm.moduleId,
+          moduleType:1,
+          moduleLogo:this.ruleForm.blockLogo,
+          moduleMaintitle:this.ruleForm.blockTitle,
+          moduleSubtitle:this.ruleForm.blockSubTitle,
+        };
+
+        console.log(this.ruleForm.moduleId);
+
+        if(this.ruleForm.moduleId){
+          url = "/proxy/backend/edit-module";
+        }else{
+          url = "/proxy/backend/add-module";
+        }
+
         this.$refs[formName].validate((valid) => {
           if (valid) {
             this.modal_loading = true;
-            console.log(this.ruleForm);
-            this.modal_loading = false;
+
+            this.$api.postQs(url, this.$utils.clearData(paramsData) ,res => {
+              this.$Message.success(res.data.desc);
+              this.modal_loading = false;
+              this.init();
+              this.drawerModal = false;
+            },res=>{
+              this.modal_loading = false;
+              this.$Message.error(res.data.desc);
+            },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
           }
         });
       },
       cancel(){
+        this.editStatus = false;
         this.drawerModal = false;
+      },
+      getPhp(){
+        this.$api.get("/proxy/backend/get-policy", {} ,res => {
+          //console.log(res.data.data);
+          if(this.filename!=""){
+            this.filename = this.filename
+          }
+          this.uploadOtherData = {
+            policy: res.data.data.policy,
+            callback: res.data.data.callback,
+            key: res.data.data.dir,
+            OSSAccessKeyId: res.data.data.accessid,
+            signature: res.data.data.signature,
+            expire: res.data.data.expire,
+            success_action_status: 200,
+            //name:'123412341234.png'
+          };
+          this.uploadUrl = res.data.data.host;
+          this.fileKey = res.data.data.dir
+
+        });
+      },
+      handleBeforeUpload(file){
+        let key = "";
+        //key = this.uploadOtherData.key + file.name;
+        this.filename = file.name;
+        this.uploadOtherData.key = this.fileKey + file.name;
       }
     }
   }
