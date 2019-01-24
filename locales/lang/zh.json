@@ -60,7 +60,10 @@
     "userSharedNum": "主动分享数",
     "userEyeNum": "被浏览数量",
     "userTopicNum": "文章数量",
-    "topicType": "分类"
+    "topicType": "分类",
+    "setAdmin": "设置为管理",
+    "adminStatus":"管理员",
+    "enabled":"启用"
   },
   "lang": {
     "inputRightTips":"该输入正确的信息!",

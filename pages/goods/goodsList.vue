@@ -172,8 +172,10 @@ export default {
           key: 'productName'
         },
         {
-          title: this.$t("data.goodsType"),
-          key: 'productModel'
+          title: this.$t("data.topicBlock"),
+          render: (h, params) => {
+            return h('span', params.row.productModule[0].moduleMaintitle);
+          }
         },
         {
           title: this.$t("data.goodsModel"),
@@ -325,7 +327,7 @@ export default {
     editGoods(params){
       this.getPhp();
       this.getBlockList();
-      //console.log(params.row.productContent);
+      console.log(params.row.productModule);
       this.ruleForm = {
           goodsName: params.row.productName,
           goodsType:  params.row.productModel,
@@ -335,11 +337,10 @@ export default {
           goodsShowImg:  params.row.productLogo,
           goodsContent:  JSON.parse(params.row.productContent).productContent,
           goodsDescription:  JSON.parse(params.row.productContent).goodsDescription,
-          goodsBlock:  params.row.id,
+          goodsBlock:  ""+params.row.productModule[0].moduleId,
           //resourceUrlList:  params.row.id,
           blogSlide: params.row.productTop,
           productId: params.row.productId,
-        goodsBlock: params.row.productModule[0],
       },
 
       this.drawerModal = true;

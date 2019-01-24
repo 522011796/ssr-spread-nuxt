@@ -1,9 +1,26 @@
 <template>
   <section class="container" id="userList">
     <div style="position: relative">
-      <Table :columns="columns" :data="data"></Table>
+      <Table :columns="columns" :data="userList"></Table>
       <Page v-if="totalCount!=0" style="text-align: right" :total="totalCount" :current="current" :page-size="pageNum" @on-change="init($event)" show-total></Page>
     </div>
+
+    <Modal
+      v-model="drawerModal"
+      :title="$t('data.setAdmin')"
+      @on-visible-change="closeModal">
+
+      <Form :model="ruleForm" ref="ruleForm" :label-width="100">
+        <FormItem label="管理员密码" prop="password" :rules="$filter_rules({required:true})">
+          <Input v-model="ruleForm.password" type="password" placeholder="请输入长度不超过20的字符" :maxlength="20" class="input-width-350"></Input>
+        </FormItem>
+      </Form>
+
+      <div slot="footer">
+        <Button type="success" :loading="modal_loading" @click="handleSubmit('ruleForm')">提交</Button>
+        <Button type="default" @click="cancel">取消</Button>
+      </div>
+    </Modal>
   </section>
 </template>
 
@@ -17,6 +34,7 @@
         article:'',
         detailHtml:'',
         detailShowModal:false,
+        modal_loading:false,
         ruleForm:{
           blogTitle:'',
           blogSlideimgurl:'',
@@ -29,150 +47,206 @@
         columns: [
           {
             title: this.$t("data.realName"),
-            key: 'blogTitle'
+            key: 'userNickname'
           },
           {
             title: this.$t("data.openid"),
-            key: 'userNickname'
+            key: 'userOpenid'
           },
           {
-            title: this.$t("data.account"),
-            key: 'userNickname'
+            title: 'Ukey',
+            key: 'userKey'
           },
           {
             title: this.$t("data.phone"),
-            key: 'userNickname'
+            key: 'userPhone'
+          },
+          {
+            title: this.$t("data.adminStatus"),
+            //key: 'userPhone'
+            render: (h, params) => {
+              if(params.row.userType == 1){
+                return h('span',{style:{color:'#19be6b'}}, 'yes');
+              }else{
+                return h('span', 'no');
+              }
+            }
           },
           {
             title: this.$t("data.userTopicNum"),
-            key: 'userNickname'
-          },
-          {
-            title: this.$t("data.userTopicNum"),
-            key: 'userNickname'
+            render: (h, params) => {
+              return h('span', '--');
+            }
           },
           {
             title: this.$t("data.userLikedNum"),
-            key: 'userNickname'
-          },
-          {
-            title: this.$t("data.userHeartNum"),
-            key: 'userNickname'
+            render: (h, params) => {
+              return h('span', '--');
+            }
           },
           {
             title: this.$t("data.userSharedNum"),
-            key: 'userNickname'
+            render: (h, params) => {
+              return h('span', '--');
+            }
           },
           {
             title: this.$t("data.userEyeNum"),
-            key: 'userNickname'
+            render: (h, params) => {
+              return h('span', '--');
+            }
           },
           {
             title: this.$t("data.tipicOpr"),
             render: (h, params) => {
-              return h('div', [
-                h('a', {
-                  props: {
-                    type: 'primary',
-                    size: 'small'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  },
-                  on: {
-                    click: () => {
-                      this.deleteOpr(params,params.index)
+              if(params.row.userStatus == 1){
+                return h('div', [
+                  h('Button', {
+                    props: {
+                      type: 'error',
+                      size: 'small'
+                    },
+                    style: {
+                      marginRight: '5px',
+                      marginTop:'5px',
+                      marginBottom:'5px',
+                      color:'#ffffff'
+                    },
+                    on: {
+                      click: () => {
+                        this.disabledOpr(params,0)
+                      }
                     }
-                  }
-                }, this.$t("data.topicDisabled")),
-                /*h('a', {
-                  props: {
-                    type: 'primary',
-                    size: 'small'
-                  },
-                  style: {
-                    marginRight: '5px',
-                    color:'#19be6b'
-                  },
-                  on: {
-                    click: () => {
-                      this.topOpr(params,params.index)
+                  }, this.$t("data.enabled"))
+                ]);
+              }else{
+                return h('div', [
+                  h('Button', {
+                    props: {
+                      type: 'error',
+                      size: 'small'
+                    },
+                    style: {
+                      marginRight: '5px',
+                      marginTop:'5px',
+                      marginBottom:'5px',
+                      color:'#ffffff'
+                    },
+                    on: {
+                      click: () => {
+                        this.disabledOpr(params,1)
+                      }
                     }
-                  }
-                }, this.$t("data.update"))*/
-              ]);
+                  }, this.$t("data.topicDisabled")),
+
+                  h('Button', {
+                    props: {
+                      type: 'info',
+                      size: 'small'
+                    },
+                    style: {
+                      marginRight: '5px',
+                      marginBottom:'5px',
+                      color:'#ffffff'
+                    },
+                    on: {
+                      click: () => {
+                        this.setAdmin(params)
+                      }
+                    }
+                  }, this.$t("data.setAdmin"))
+                ]);
+              }
             }
           }
         ],
-        data: [],
-        defaultList: [
-          {
-            'name': 'a42bdcc1178e62b4694c830f028db5c0',
-            'url': 'https://o5wwk8baw.qnssl.com/a42bdcc1178e62b4694c830f028db5c0/avatar'
-          }
-        ],
-        imgName: '',
-        visible: false,
-        uploadList: [],
-        processStatus:0,
-        processStatusShow:false,
-        processAddStatus:0,
-        processAddStatusShow:true,
-        blogShowTitle:'',
-        userShowNickname:'',
-        blogAddtime:'',
-        blogShowContent:'',
-        blogShowAddtime:'',
-        userHeadimgurl:'',
+        userList: [],
         pageNum:15,
         current:1,
         pageNow:1,
         totalCount:0,
+        ruleForm:{
+          password:'',
+          userKey:'',
+          userType:''
+        }
       }
     },
     created() {
       this.init();
-      this.getType();
     },
     methods:{
       init(page){
         var _self = this;
         this.pageNow  = page ? page : this.pageNow;
         var params = {
-          keyword:'',
           page:_self.pageNow,
-          pageSize:this.pageNum,
-          blogSlide:0
+          pageSize:this.pageNum
         };
-        this.$api.get('/proxy/backend/get-blog-list',params,res => {
+        this.$api.get('/proxy/backend/get-user-list',params,res => {
           //this.list = res.data;
           console.log(res);
-          this.totalCount = parseInt(res.data.data.blogCount);
-          this.data = res.data.data.blogList;
+          this.totalCount = parseInt(res.data.data.userCount);
+          this.userList = res.data.data.userList;
         });
       },
-      getType(){
-        this.$api.get('/proxy/backend/get-category-list',{},res => {
-          //this.list = res.data;
-          //console.log(res.data.data.categoryList);
-          let list = [
-            {
-              id:'1',
-              name:'教程'
-            },
-            {
-              id:'2',
-              name:'资料'
-            }
-          ];
-          let selList = ['1','2'];
+      setAdmin(params){
+        this.drawerModal = true;
+        this.ruleForm.userKey = params.row.userKey;
+      },
+      disabledOpr(params,status){
+        var paramsData = {
+          userKey : params.row.userKey,
+          userStatus: status
+        };
+        this.$api.postQs('/proxy/backend/set-user-type', this.$utils.clearData(paramsData) ,res => {
+          this.$Message.success(res.data.desc);
+          this.modal_loading = false;
+          this.init(this.pageNow);
+          this.drawerModal = false;
+        },res=>{
+          this.modal_loading = false;
+          this.$Message.error(res.data.desc);
+        },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
+      },
+      closeModal(status){
+        if(status == false){
+          this.ruleForm = {
+            password:'',
+            userType:'',
+            userPassword:''
+          };
+          this.drawerModal = false;
+          this.$refs['ruleForm'].resetFields();
+        }
+      },
+      handleSubmit (formName) {
+        let _self = this;
+        let url = "";
+        let paramsData = {
+          userPassword:this.ruleForm.password,
+          userKey:this.ruleForm.userKey,
+          userType:1
+        };
 
-          this.ruleForm.categoryIdList = selList;
-          this.categoryList = list;
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.modal_loading = true;
+
+            this.$api.postQs('/proxy/backend/set-user-type', this.$utils.clearData(paramsData) ,res => {
+              this.$Message.success(res.data.desc);
+              this.modal_loading = false;
+              this.init(this.pageNow);
+              this.drawerModal = false;
+            },res=>{
+              this.modal_loading = false;
+              this.$Message.error(res.data.desc);
+            },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
+          }
         });
       },
-      addTopic(){
-
+      cancel(){
+        this.drawerModal = false;
       }
     }
   }
