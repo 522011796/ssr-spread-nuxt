@@ -103,7 +103,7 @@
                 return h('div', [
                   h('Button', {
                     props: {
-                      type: 'error',
+                      type: 'success',
                       size: 'small'
                     },
                     style: {
@@ -117,7 +117,41 @@
                         this.disabledOpr(params,0)
                       }
                     }
-                  }, this.$t("data.enabled"))
+                  }, this.$t("data.enabled")),
+
+                  h('Button', {
+                    props: {
+                      type: 'info',
+                      size: 'small'
+                    },
+                    style: {
+                      marginRight: '5px',
+                      marginBottom:'5px',
+                      color:'#ffffff'
+                    },
+                    on: {
+                      click: () => {
+                        this.setAdmin(params)
+                      }
+                    }
+                  }, this.$t("data.setAdmin")),
+
+                  h('Button', {
+                    props: {
+                      type: 'error',
+                      size: 'small'
+                    },
+                    style: {
+                      marginRight: '5px',
+                      marginBottom:'5px',
+                      color:'#ffffff'
+                    },
+                    on: {
+                      click: () => {
+                        this.cancelAdmin(params)
+                      }
+                    }
+                  }, this.$t("data.cancelAdmin"))
                 ]);
               }else{
                 return h('div', [
@@ -154,7 +188,24 @@
                         this.setAdmin(params)
                       }
                     }
-                  }, this.$t("data.setAdmin"))
+                  }, this.$t("data.setAdmin")),
+
+                  h('Button', {
+                    props: {
+                      type: 'info',
+                      size: 'small'
+                    },
+                    style: {
+                      marginRight: '5px',
+                      marginBottom:'5px',
+                      color:'#ffffff'
+                    },
+                    on: {
+                      click: () => {
+                        this.cancelAdmin(params)
+                      }
+                    }
+                  }, this.$t("data.cancelAdmin"))
                 ]);
               }
             }
@@ -199,7 +250,7 @@
           userKey : params.row.userKey,
           userStatus: status
         };
-        this.$api.postQs('/proxy/backend/set-user-type', this.$utils.clearData(paramsData) ,res => {
+        this.$api.postQs('/proxy/backend/set-user-status', this.$utils.clearData(paramsData) ,res => {
           this.$Message.success(res.data.desc);
           this.modal_loading = false;
           this.init(this.pageNow);
@@ -244,6 +295,24 @@
             },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
           }
         });
+      },
+      cancelAdmin(params){
+        let paramsData = {
+          userKey:params.row.userKey,
+          userType:0
+        };
+
+        this.modal_loading = true;
+
+        this.$api.postQs('/proxy/backend/set-user-type', this.$utils.clearData(paramsData) ,res => {
+          this.$Message.success(res.data.desc);
+          this.modal_loading = false;
+          this.init(this.pageNow);
+          this.drawerModal = false;
+        },res=>{
+          this.modal_loading = false;
+          this.$Message.error(res.data.desc);
+        },{"Content-Type":'application/x-www-form-urlencoded; charset=UTF-8'});
       },
       cancel(){
         this.drawerModal = false;
